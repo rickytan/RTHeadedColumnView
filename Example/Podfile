@@ -4,8 +4,5 @@ target 'RTHeadedColumnView_Example' do
   pod 'RTHeadedColumnView', :path => '../'
 
   target 'RTHeadedColumnView_Tests' do
-    inherit! :search_paths
-
-    
   end
 end

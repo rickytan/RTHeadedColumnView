@@ -8,8 +8,13 @@
 
 #import "RTViewController.h"
 
-@interface RTViewController ()
+#import "RTDemoTableView.h"
+#import "RTHeaderDemoTableView.h"
 
+@import RTHeadedColumnView;
+
+@interface RTViewController () <RTHeadedColumnViewDelegate>
+@property (nonatomic, strong) RTHeadedColumnView *columnView;
 @end
 
 @implementation RTViewController
@@ -17,7 +22,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), 180)];
+    headerView.backgroundColor = [UIColor colorWithWhite:1.f * 0x99 / 0xff
+                                                   alpha:1.f];
+
+    self.columnView = [[RTHeadedColumnView alloc] initWithFrame:self.view.bounds];
+    self.columnView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    [self.view addSubview:self.columnView];
+
+    self.columnView.headerView = headerView;
+    self.columnView.dockingHeight = 44.f;
+    self.columnView.contentColumns = @[[RTDemoTableView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
 }
 
 - (void)didReceiveMemoryWarning

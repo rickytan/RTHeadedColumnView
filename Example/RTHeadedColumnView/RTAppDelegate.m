@@ -8,11 +8,17 @@
 
 #import "RTAppDelegate.h"
 
+#import "RTViewController.h"
+
 @implementation RTAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    self.window.rootViewController = [RTViewController new];
+    [self.window makeKeyAndVisible];
+
     return YES;
 }
 

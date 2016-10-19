@@ -1,0 +1,24 @@
+{
+  "name": "RTHeadedColumnView",
+  "version": "0.1.0",
+  "summary": "A short description of RTHeadedColumnView.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/rickytan/RTHeadedColumnView",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "rickytan": "ricky.tan.xin@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/rickytan/RTHeadedColumnView.git",
+    "tag": "0.1.0"
+  },
+  "social_media_url": "http://rickytan.cn",
+  "platforms": {
+    "ios": "6.0"
+  },
+  "source_files": "RTHeadedColumnView/Classes/**/*",
+  "frameworks": "UIKit"
+}

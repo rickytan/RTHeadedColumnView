@@ -1,0 +1,6 @@
+framework module Pods_RTHeadedColumnView_Example {
+  umbrella header "Pods-RTHeadedColumnView_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

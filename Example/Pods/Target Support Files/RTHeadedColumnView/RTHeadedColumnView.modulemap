@@ -1,0 +1,6 @@
+framework module RTHeadedColumnView {
+  umbrella header "RTHeadedColumnView-umbrella.h"
+
+  export *
+  module * { export * }
+}

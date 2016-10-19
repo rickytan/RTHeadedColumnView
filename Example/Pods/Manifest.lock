@@ -1,0 +1,14 @@
+PODS:
+  - RTHeadedColumnView (0.1.0)
+
+DEPENDENCIES:
+  - RTHeadedColumnView (from `../`)
+
+EXTERNAL SOURCES:
+  RTHeadedColumnView:
+    :path: ../
+
+SPEC CHECKSUMS:
+  RTHeadedColumnView: e5e8d35356deeba98a37858362f1eb349d1a8b8f
+
+COCOAPODS: 0.39.0
