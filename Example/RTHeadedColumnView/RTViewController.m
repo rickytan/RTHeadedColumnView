@@ -124,8 +124,10 @@
     imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     UILabel *bottomView = [[UILabel alloc] init];
+    bottomView.userInteractionEnabled = YES;
     bottomView.font = [UIFont systemFontOfSize:30];
     bottomView.textColor = [UIColor whiteColor];
+    bottomView.textAlignment = NSTextAlignmentCenter;
     bottomView.text = @"A Common Title";
     bottomView.backgroundColor = [UIColor orangeColor];
     bottomView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
@@ -138,30 +140,50 @@
     [headerView addSubview:bottomView];
     [headerView addSubview:imageView];
 
-    UIStepper *stepper = [[UIStepper alloc] initWithFrame:CGRectMake(0, 0, 64, 44)];
-    stepper.minimumValue = 80;
-    stepper.maximumValue = 320;
-    stepper.stepValue = 20;
-    stepper.value = headerView.bounds.size.height;
-    [stepper addTarget:self
-                action:@selector(onStepper:)
-      forControlEvents:UIControlEventValueChanged];
-    [headerView addSubview:stepper];
+    {
+        UIStepper *stepper = [[UIStepper alloc] init];
+        stepper.minimumValue = 80;
+        stepper.maximumValue = 320;
+        stepper.stepValue = 20;
+        stepper.value = headerView.bounds.size.height;
+        [stepper addTarget:self
+                    action:@selector(onHeaderHeight:)
+          forControlEvents:UIControlEventValueChanged];
+        [bottomView addSubview:stepper];
+    }
+    {
+        UIStepper *stepper = [[UIStepper alloc] init];
+        stepper.frame = CGRectMake(bottomView.bounds.size.width - stepper.frame.size.width, 0, stepper.frame.size.width, stepper.frame.size.height);
+        stepper.minimumValue = 0;
+        stepper.maximumValue = 320;
+        stepper.stepValue = 10;
+        stepper.value = 44.f;
+        [stepper addTarget:self
+                    action:@selector(onDockingHeight:)
+          forControlEvents:UIControlEventValueChanged];
+        [bottomView addSubview:stepper];
+    }
 
     self.columnView = [[RTHeadedColumnView alloc] initWithFrame:self.view.bounds];
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:self.columnView];
 
-    self.columnView.headerView = headerView;
-    self.columnView.dockingHeight = 44.f;
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
+    self.columnView.dockingHeight = 44.f;
+    self.columnView.headerViewHeight = 56.f;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.columnView.headerView = headerView;
+    });
 }
 
-- (void)onStepper:(UIStepper *)stepper
+- (void)onHeaderHeight:(UIStepper *)stepper
 {
-//    self.columnView.headerViewHeight = stepper.value;
-    [self.columnView setHeaderViewHeight:stepper.value
-                                animated:YES];
+    self.columnView.headerViewHeight = stepper.value;
+}
+
+- (void)onDockingHeight:(UIStepper *)stepper
+{
+    self.columnView.dockingHeight = stepper.value;
 }
 
 @end

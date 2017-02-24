@@ -55,6 +55,8 @@
 static void *observerContext = &observerContext;
 
 @implementation RTHeadedColumnView
+@synthesize dockingHeight = _dockingHeight;
+@synthesize headerViewHeight = _headerViewHeight;
 
 - (void)dealloc
 {
@@ -130,9 +132,8 @@ static void *observerContext = &observerContext;
     if (headerView) {
         [_headerView removeFromSuperview];
         _headerView = headerView;
-        self.headerViewHeight = headerView.bounds.size.height;
-
         [self addSubview:_headerView];
+        self.headerViewHeight = headerView.bounds.size.height;
     }
     else {
         [_headerView removeFromSuperview];
@@ -170,15 +171,23 @@ static void *observerContext = &observerContext;
         CGRect rect = self.headerView.frame;
         rect.size.height = headerViewHeight;
         self.headerView.frame = rect;
-        self.dockingHeight = self.dockingHeight;
+        self.dockingHeight = _dockingHeight;
     }
+}
+
+- (CGFloat)headerViewHeight
+{
+    if (self.headerView) {
+        return _headerViewHeight;
+    }
+    return 0.f;
 }
 
 - (void)setHeaderViewHeight:(CGFloat)headerViewHeight animated:(BOOL)animated
 {
     [UIView animateWithDuration:animated ? 0.25 : 0
                           delay:0
-                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState
+                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionLayoutSubviews | UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
                          self.headerViewHeight = headerViewHeight;
                      }
@@ -228,6 +237,14 @@ static void *observerContext = &observerContext;
         }
     }];
     [self setNeedsLayout];
+}
+
+- (CGFloat)dockingHeight
+{
+    if (self.headerView) {
+        return MIN(_dockingHeight, _headerViewHeight);
+    }
+    return 0.f;
 }
 
 - (UIView *)createPlaceholderHeaderViewWithHeight:(CGFloat)height
