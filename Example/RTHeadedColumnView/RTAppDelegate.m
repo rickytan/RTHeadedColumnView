@@ -8,7 +8,7 @@
 
 #import "RTAppDelegate.h"
 
-#import "RTViewController.h"
+#import "RTRootTableViewController.h"
 
 @implementation RTAppDelegate
 
@@ -16,7 +16,7 @@
 {
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.window.rootViewController = [RTViewController new];
+    self.window.rootViewController = [[UINavigationController alloc] initWithRootViewController:[[RTRootTableViewController alloc] init]];
     [self.window makeKeyAndVisible];
 
     return YES;

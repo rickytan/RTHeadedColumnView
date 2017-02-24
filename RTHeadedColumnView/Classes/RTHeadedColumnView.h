@@ -20,21 +20,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+IB_DESIGNABLE
 @interface RTHeadedColumnView : UIView
 
 @property (nonatomic, weak, nullable) IBOutlet id<RTHeadedColumnViewDelegate> delegate;
 
 @property (nonatomic, strong, nullable) UIView *headerView;
-@property (nonatomic, assign) BOOL headerBounce;
+@property (nonatomic, assign) IBInspectable BOOL headerBounce;
+@property (nonatomic, assign) IBInspectable BOOL automaticallyAdjustsScrollViewInsets;
 
-@property (nonatomic, assign) CGFloat headerViewHeight;
+@property (nonatomic, assign) IBInspectable CGFloat headerViewHeight;
 
 - (void)setHeaderViewHeight:(CGFloat)height animated:(BOOL)animated;
 
 
-@property (nonatomic, assign) CGFloat dockingHeight;
+@property (nonatomic, assign) IBInspectable CGFloat dockingHeight;
 
-@property (nonatomic, strong, nullable) NSArray <__kindof UIScrollView *> *contentColumns;
+@property (nonatomic, strong, nullable) IBOutletCollection(UIScrollView) NSArray <__kindof UIScrollView *> *contentColumns;
 
 @property (nonatomic, assign) NSInteger selectedColumn;
 

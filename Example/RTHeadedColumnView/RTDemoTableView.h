@@ -11,3 +11,11 @@
 @interface RTDemoTableView : UITableView <UITableViewDelegate, UITableViewDataSource>
 
 @end
+
+@interface RTHeaderDemoTableView : UITableView <UITableViewDelegate, UITableViewDataSource>
+
+@end
+
+@interface RTDemoCollectionView : UICollectionView <UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
+
+@end

@@ -67,7 +67,7 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithFrame:frame];
     if (self) {
-
+        self.automaticallyAdjustsScrollViewInsets = YES;
     }
     return self;
 }
@@ -184,10 +184,10 @@ static void *observerContext = &observerContext;
 {
     _dockingHeight = dockingHeight;
 
-    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         if ([obj isKindOfClass:[UITableView class]]) {
             UITableView *tableView = (UITableView *)obj;
-            if (!tableView.mc_originalTableHeaderView) {
+            if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
                 UIView *tableHeader = tableView.tableHeaderView;
                 tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
@@ -203,9 +203,21 @@ static void *observerContext = &observerContext;
         }
         else {
             UIEdgeInsets inset = obj.contentInset;
+            CGFloat delta = inset.top - (self.headerViewHeight - self.dockingHeight);
             inset.top = self.headerViewHeight - self.dockingHeight;
+
+            CGPoint offset = obj.contentOffset;
+            offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.dockingHeight));
+
+            // Must change offset first!
+            obj.contentOffset = offset;
             obj.contentInset = inset;
-            obj.contentOffset = CGPointMake(0, -(self.headerViewHeight - self.dockingHeight));
+        }
+
+        if (self.automaticallyAdjustsScrollViewInsets) {
+            UIEdgeInsets inset = obj.scrollIndicatorInsets;
+            inset.top = self.headerViewHeight - self.dockingHeight;
+            obj.scrollIndicatorInsets = inset;
         }
     }];
     [self setNeedsLayout];
@@ -216,7 +228,10 @@ static void *observerContext = &observerContext;
 {
     UIView *view = [[MZMultiColumnTableHeaderPlaceholderView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), height + CGRectGetHeight(tableHeader.bounds))];
     if (tableHeader) {
-        tableHeader.frame = CGRectMake(0, CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds), CGRectGetWidth(view.bounds), CGRectGetHeight(tableHeader.bounds));
+        tableHeader.frame = CGRectMake(0,
+                                       CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds),
+                                       CGRectGetWidth(view.bounds),
+                                       CGRectGetHeight(tableHeader.bounds));
         tableHeader.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
         [view addSubview:tableHeader];
     }
@@ -229,7 +244,8 @@ static void *observerContext = &observerContext;
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             [obj removeFromSuperview];
             [obj removeObserver:self
-                     forKeyPath:NSStringFromSelector(@selector(contentOffset))];
+                     forKeyPath:NSStringFromSelector(@selector(contentOffset))
+                        context:observerContext];
         }];
 
         _contentColumns = contentColumns;
@@ -240,7 +256,7 @@ static void *observerContext = &observerContext;
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
-                if (!tableView.mc_originalTableHeaderView) {
+                if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
@@ -258,7 +274,16 @@ static void *observerContext = &observerContext;
                 UIEdgeInsets inset = obj.contentInset;
                 inset.top = self.headerViewHeight - self.dockingHeight;
                 obj.contentInset = inset;
-                obj.contentOffset = CGPointMake(0, -(self.headerViewHeight - self.dockingHeight));
+
+                CGPoint offset = obj.contentOffset;
+                offset.y = MAX(offset.y, -(self.headerViewHeight - self.dockingHeight));
+                obj.contentOffset = offset;
+            }
+
+            if (self.automaticallyAdjustsScrollViewInsets) {
+                UIEdgeInsets inset = obj.scrollIndicatorInsets;
+                inset.top = self.headerViewHeight - self.dockingHeight;
+                obj.scrollIndicatorInsets = inset;
             }
 
             obj.frame = CGRectMake(width * idx, 0, width, height);

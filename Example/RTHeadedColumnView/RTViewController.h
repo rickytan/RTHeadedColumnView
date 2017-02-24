@@ -11,3 +11,7 @@
 @interface RTViewController : UIViewController
 
 @end
+
+@interface RTCollectionsViewController : UIViewController
+
+@end
