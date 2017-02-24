@@ -162,20 +162,29 @@ static void *observerContext = &observerContext;
     }
 }
 
-- (void)setHeaderViewHeight:(CGFloat)height animated:(BOOL)animated
+- (void)setHeaderViewHeight:(CGFloat)headerViewHeight
 {
-    if (_headerViewHeight != height) {
-        [UIView animateWithDuration:animated ? 0.3 : 0
+    if (_headerViewHeight != headerViewHeight) {
+        _headerViewHeight = headerViewHeight;
+
+        CGRect rect = self.headerView.frame;
+        rect.size.height = headerViewHeight;
+        self.headerView.frame = rect;
+        self.dockingHeight = self.dockingHeight;
+    }
+}
+
+- (void)setHeaderViewHeight:(CGFloat)headerViewHeight animated:(BOOL)animated
+{
+    if (_headerViewHeight != headerViewHeight) {
+        [UIView animateWithDuration:animated ? 0.25 : 0
                               delay:0
                             options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState
                          animations:^{
-                             _headerViewHeight = height;
-                             CGRect rect = self.headerView.frame;
-                             rect.size.height = height;
-                             self.headerView.frame = rect;
+                             self.headerViewHeight = headerViewHeight;
                          }
                          completion:^(BOOL finished) {
-                             self.dockingHeight = self.dockingHeight;
+
                          }];
     }
 }

@@ -66,7 +66,8 @@
                                                  animated:YES];
             break;
         default:
-
+            [self.navigationController pushViewController:[[RTChangeHeaderHeightViewController alloc] init]
+                                                 animated:YES];
             break;
     }
 }

@@ -15,3 +15,7 @@
 @interface RTCollectionsViewController : UIViewController
 
 @end
+
+@interface RTChangeHeaderHeightViewController : UIViewController
+
+@end
