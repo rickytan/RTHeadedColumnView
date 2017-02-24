@@ -176,17 +176,15 @@ static void *observerContext = &observerContext;
 
 - (void)setHeaderViewHeight:(CGFloat)headerViewHeight animated:(BOOL)animated
 {
-    if (_headerViewHeight != headerViewHeight) {
-        [UIView animateWithDuration:animated ? 0.25 : 0
-                              delay:0
-                            options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState
-                         animations:^{
-                             self.headerViewHeight = headerViewHeight;
-                         }
-                         completion:^(BOOL finished) {
+    [UIView animateWithDuration:animated ? 0.25 : 0
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                         self.headerViewHeight = headerViewHeight;
+                     }
+                     completion:^(BOOL finished) {
 
-                         }];
-    }
+                     }];
 }
 
 - (void)setDockingHeight:(CGFloat)dockingHeight
