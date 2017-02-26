@@ -1,4 +1,3 @@
-use_frameworks!
 
 target 'RTHeadedColumnView_Example' do
   pod 'RTHeadedColumnView', :path => '../'

@@ -64,6 +64,7 @@
 @interface RTHeadedColumnView () <UIScrollViewDelegate>
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat currentOffset;
+@property (nonatomic) BOOL ignoreOffsetChangeNotify;
 @end
 
 static void *observerContext = &observerContext;
@@ -83,6 +84,7 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithFrame:frame];
     if (self) {
+        self.backgroundColor = [UIColor whiteColor];
         self.automaticallyAdjustsScrollIndicatorInsets = YES;
     }
     return self;
@@ -101,7 +103,7 @@ static void *observerContext = &observerContext;
         CGFloat offset = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         self.currentOffset = offset + top;
 
-        if (offset + top > self.headerViewHeight - self.headerPinHeight) {
+        if (self.currentOffset > self.headerViewHeight - self.headerPinHeight) {
             if (self.headerViewEmbeded) {
                 self.headerView.frame = CGRectMake(0, offset - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
@@ -115,17 +117,17 @@ static void *observerContext = &observerContext;
             }];
         }
         else {
-            if (self.headerViewBounce) {
-                if (self.headerViewEmbeded) {
+            if (self.headerViewEmbeded) {
+                if (self.headerViewBounce) {
                     self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
-                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.headerPinHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, MIN(-top, offset), self.bounds.size.width, self.headerViewHeight);
                 }
             }
             else {
-                if (self.headerViewEmbeded) {
-                    self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
+                if (self.headerViewBounce) {
+                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.headerPinHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
@@ -277,7 +279,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - self.headerPinHeight);
 
                 // Must change offset first!
+                self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
+                self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             else {
@@ -289,7 +293,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - self.headerViewHeight);
 
                 // Must change offset first!
+                self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
+                self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
 
@@ -322,7 +328,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, 0);
 
                 // Must change offset first!
+                self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
+                self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             else {
@@ -334,7 +342,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
 
                 // Must change offset first!
+                self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
+                self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
 
@@ -356,19 +366,15 @@ static void *observerContext = &observerContext;
     return 0.f;
 }
 
-- (UIView *)_createPlaceholderHeaderViewWithHeight:(CGFloat)height
-                           originalTableHeaderView:(UIView *)tableHeader
+- (void)setCurrentOffset:(CGFloat)currentOffset
 {
-    UIView *view = [[__RTTableHeaderPlaceholderView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), height + CGRectGetHeight(tableHeader.bounds))];
-    if (tableHeader) {
-        tableHeader.frame = CGRectMake(0,
-                                       CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds),
-                                       CGRectGetWidth(view.bounds),
-                                       CGRectGetHeight(tableHeader.bounds));
-        tableHeader.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-        [view addSubview:tableHeader];
+    if (_currentOffset != currentOffset) {
+        _currentOffset = currentOffset;
+        if (!self.ignoreOffsetChangeNotify && [self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
+            [self.delegate columnView:self
+                    didScrollToOffset:UIOffsetMake(self.scrollView.contentOffset.x, self.currentOffset)];
+        }
     }
-    return view;
 }
 
 - (void)setContentColumns:(NSArray<__kindof UIScrollView *> *)contentColumns
@@ -455,6 +461,21 @@ static void *observerContext = &observerContext;
         [_headerView.superview bringSubviewToFront:_headerView];
 }
 
+- (UIView *)_createPlaceholderHeaderViewWithHeight:(CGFloat)height
+                           originalTableHeaderView:(UIView *)tableHeader
+{
+    UIView *view = [[__RTTableHeaderPlaceholderView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), height + CGRectGetHeight(tableHeader.bounds))];
+    if (tableHeader) {
+        tableHeader.frame = CGRectMake(0,
+                                       CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds),
+                                       CGRectGetWidth(view.bounds),
+                                       CGRectGetHeight(tableHeader.bounds));
+        tableHeader.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+        [view addSubview:tableHeader];
+    }
+    return view;
+}
+
 - (void)_notifySelectionChanged
 {
     CGFloat width = self.bounds.size.width;
@@ -500,9 +521,8 @@ static void *observerContext = &observerContext;
     [self _notifySelectionChanged];
 }
 
-- (void)setCurrentOffset:(CGFloat)currentOffset
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    _currentOffset = currentOffset;
     if ([self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
         [self.delegate columnView:self
                 didScrollToOffset:UIOffsetMake(self.scrollView.contentOffset.x, _currentOffset)];

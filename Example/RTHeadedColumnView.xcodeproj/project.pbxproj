@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		294B62A5E80BC4AED1394DDE /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 925738AB556C76F8915C051E /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a */; };
+		43A3DA70A9C49A891A1F2580 /* libPods-RTHeadedColumnView_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AD5C43096B899546B24565C /* libPods-RTHeadedColumnView_Example.a */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -20,11 +22,9 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
-		624F581D4ACC1C58BA936AE1 /* Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81F6AD2CE3F3AA59141AA662 /* Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework */; };
 		9CAF6E681E5DC86A0054F85F /* RTRootTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CAF6E671E5DC86A0054F85F /* RTRootTableViewController.m */; };
 		9CDB34261DB7BE2C0001F57F /* RTDemoTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CDB34251DB7BE2C0001F57F /* RTDemoTableView.m */; };
 		9CDB34281DB7C0F00001F57F /* Launchscreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9CDB34271DB7C0F00001F57F /* Launchscreen.storyboard */; };
-		E2B07905A20A2FBF9CA0CA8C /* Pods_RTHeadedColumnView_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2B5EC48C1B4140B2C431D75 /* Pods_RTHeadedColumnView_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,14 +61,14 @@
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		6DF17A00182128C491569E8B /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		81F6AD2CE3F3AA59141AA662 /* Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		863ADE4F05DF584BFAA5F2E7 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		8AD5C43096B899546B24565C /* libPods-RTHeadedColumnView_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RTHeadedColumnView_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		925738AB556C76F8915C051E /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9CAF6E661E5DC86A0054F85F /* RTRootTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTRootTableViewController.h; sourceTree = "<group>"; };
 		9CAF6E671E5DC86A0054F85F /* RTRootTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTRootTableViewController.m; sourceTree = "<group>"; };
 		9CDB34241DB7BE2C0001F57F /* RTDemoTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTDemoTableView.h; sourceTree = "<group>"; };
 		9CDB34251DB7BE2C0001F57F /* RTDemoTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTDemoTableView.m; sourceTree = "<group>"; };
 		9CDB34271DB7C0F00001F57F /* Launchscreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Launchscreen.storyboard; sourceTree = "<group>"; };
-		B2B5EC48C1B4140B2C431D75 /* Pods_RTHeadedColumnView_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RTHeadedColumnView_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B49AB2CB92D57F8385C6C67A /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests/Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		BAB3BEE1E4EF85038080E8B1 /* RTHeadedColumnView.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = RTHeadedColumnView.podspec; path = ../RTHeadedColumnView.podspec; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -81,7 +81,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
-				E2B07905A20A2FBF9CA0CA8C /* Pods_RTHeadedColumnView_Example.framework in Frameworks */,
+				43A3DA70A9C49A891A1F2580 /* libPods-RTHeadedColumnView_Example.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,7 +92,7 @@
 				6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */,
 				6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */,
-				624F581D4ACC1C58BA936AE1 /* Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework in Frameworks */,
+				294B62A5E80BC4AED1394DDE /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,8 +138,8 @@
 				6003F58F195388D20070C39A /* CoreGraphics.framework */,
 				6003F591195388D20070C39A /* UIKit.framework */,
 				6003F5AF195388D20070C39A /* XCTest.framework */,
-				B2B5EC48C1B4140B2C431D75 /* Pods_RTHeadedColumnView_Example.framework */,
-				81F6AD2CE3F3AA59141AA662 /* Pods_RTHeadedColumnView_Example_RTHeadedColumnView_Tests.framework */,
+				8AD5C43096B899546B24565C /* libPods-RTHeadedColumnView_Example.a */,
+				925738AB556C76F8915C051E /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

@@ -10,7 +10,7 @@
 
 #import "RTDemoTableView.h"
 
-@import RTHeadedColumnView;
+#import <RTHeadedColumnView/RTHeadedColumnView.h>
 
 @interface RTViewController () <RTHeadedColumnViewDelegate>
 @property (nonatomic, strong) RTHeadedColumnView *columnView;
@@ -104,7 +104,7 @@
 
 @end
 
-@interface RTChangeHeaderHeightViewController ()
+@interface RTChangeHeaderHeightViewController () <RTHeadedColumnViewDelegate>
 @property (nonatomic, strong) RTHeadedColumnView *columnView;
 @end
 
@@ -156,7 +156,6 @@
                           }),
                           ({
                               UIStepper *stepper = [[UIStepper alloc] init];
-                              stepper.frame = CGRectMake(bottomView.bounds.size.width - stepper.frame.size.width, 0, stepper.frame.size.width, stepper.frame.size.height);
                               stepper.minimumValue = 0;
                               stepper.maximumValue = 320;
                               stepper.stepValue = 10;
@@ -172,11 +171,19 @@
                                forControlEvents:UIControlEventValueChanged];
                               toggle.on = NO;
                               [[UIBarButtonItem alloc] initWithCustomView:toggle];
+                          }),
+                          ({
+                              UISwitch *toggle = [[UISwitch alloc] init];
+                              [toggle addTarget:self action:@selector(onBounce:)
+                               forControlEvents:UIControlEventValueChanged];
+                              toggle.on = NO;
+                              [[UIBarButtonItem alloc] initWithCustomView:toggle];
                           })
                           ];
 
     self.columnView = [[RTHeadedColumnView alloc] initWithFrame:self.view.bounds];
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.columnView.delegate = self;
     [self.view addSubview:self.columnView];
 
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
@@ -197,6 +204,23 @@
 - (void)onEmbed:(UISwitch *)toggle
 {
     self.columnView.headerViewEmbeded = toggle.isOn;
+}
+
+- (void)onBounce:(UISwitch *)toggle
+{
+    self.columnView.headerViewBounce = toggle.isOn;
+}
+
+#pragma mark - Delegate
+
+- (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex
+{
+    NSLog(@"Did display column: %zd", columnIndex);
+}
+
+- (void)columnView:(RTHeadedColumnView *)columnView didScrollToOffset:(UIOffset)offset
+{
+    NSLog(@"Offset %@", NSStringFromUIOffset(offset));
 }
 
 @end

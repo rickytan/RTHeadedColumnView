@@ -28,7 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol RTHeadedColumnViewDelegate <NSObject>
 @optional
-- (void)columnView:(RTHeadedColumnView *)columnView willDisplayColumn:(NSInteger)columnIndex;
 - (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex;
 - (void)columnView:(RTHeadedColumnView *)columnView didScrollToOffset:(UIOffset)offset;
 
