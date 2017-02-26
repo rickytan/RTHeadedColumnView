@@ -115,6 +115,7 @@
     [super viewDidLoad];
 
     self.edgesForExtendedLayout = UIRectEdgeNone;
+    [self.navigationController setToolbarHidden:NO animated:YES];
 
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), 200)];
     headerView.backgroundColor = [UIColor colorWithWhite:1.f * 0x99 / 0xff
@@ -122,6 +123,7 @@
 
     UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"github"]];
     imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
 
     UILabel *bottomView = [[UILabel alloc] init];
     bottomView.userInteractionEnabled = YES;
@@ -140,41 +142,46 @@
     [headerView addSubview:bottomView];
     [headerView addSubview:imageView];
 
-    {
-        UIStepper *stepper = [[UIStepper alloc] init];
-        stepper.minimumValue = 80;
-        stepper.maximumValue = 320;
-        stepper.stepValue = 20;
-        stepper.value = headerView.bounds.size.height;
-        [stepper addTarget:self
-                    action:@selector(onHeaderHeight:)
-          forControlEvents:UIControlEventValueChanged];
-        [bottomView addSubview:stepper];
-    }
-    {
-        UIStepper *stepper = [[UIStepper alloc] init];
-        stepper.frame = CGRectMake(bottomView.bounds.size.width - stepper.frame.size.width, 0, stepper.frame.size.width, stepper.frame.size.height);
-        stepper.minimumValue = 0;
-        stepper.maximumValue = 320;
-        stepper.stepValue = 10;
-        stepper.value = 44.f;
-        [stepper addTarget:self
-                    action:@selector(onDockingHeight:)
-          forControlEvents:UIControlEventValueChanged];
-        [bottomView addSubview:stepper];
-    }
+    self.toolbarItems = @[
+                          ({
+                              UIStepper *stepper = [[UIStepper alloc] init];
+                              stepper.minimumValue = 80;
+                              stepper.maximumValue = 320;
+                              stepper.stepValue = 20;
+                              stepper.value = headerView.bounds.size.height;
+                              [stepper addTarget:self
+                                          action:@selector(onHeaderHeight:)
+                                forControlEvents:UIControlEventValueChanged];
+                              [[UIBarButtonItem alloc] initWithCustomView:stepper];
+                          }),
+                          ({
+                              UIStepper *stepper = [[UIStepper alloc] init];
+                              stepper.frame = CGRectMake(bottomView.bounds.size.width - stepper.frame.size.width, 0, stepper.frame.size.width, stepper.frame.size.height);
+                              stepper.minimumValue = 0;
+                              stepper.maximumValue = 320;
+                              stepper.stepValue = 10;
+                              stepper.value = 44.f;
+                              [stepper addTarget:self
+                                          action:@selector(onDockingHeight:)
+                                forControlEvents:UIControlEventValueChanged];
+                              [[UIBarButtonItem alloc] initWithCustomView:stepper];
+                          }),
+                          ({
+                              UISwitch *toggle = [[UISwitch alloc] init];
+                              [toggle addTarget:self action:@selector(onEmbed:)
+                               forControlEvents:UIControlEventValueChanged];
+                              toggle.on = NO;
+                              [[UIBarButtonItem alloc] initWithCustomView:toggle];
+                          })
+                          ];
 
     self.columnView = [[RTHeadedColumnView alloc] initWithFrame:self.view.bounds];
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:self.columnView];
 
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
+    self.columnView.headerView = headerView;
     self.columnView.dockingHeight = 44.f;
-    self.columnView.headerViewHeight = 56.f;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        self.columnView.headerView = headerView;
-        self.columnView.headerViewEmbeded = YES;
-    });
 }
 
 - (void)onHeaderHeight:(UIStepper *)stepper
@@ -185,6 +192,11 @@
 - (void)onDockingHeight:(UIStepper *)stepper
 {
     self.columnView.dockingHeight = stepper.value;
+}
+
+- (void)onEmbed:(UISwitch *)toggle
+{
+    self.columnView.headerViewEmbeded = toggle.isOn;
 }
 
 @end

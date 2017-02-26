@@ -189,9 +189,12 @@ static void *observerContext = &observerContext;
         _headerViewEmbeded = headerViewEmbeded;
 
         if (self.headerView) {
-            self.headerView.frame = CGRectMake(0, -self.headerViewHeight, self.bounds.size.width, self.headerViewHeight);
-            [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
-
+            if (_headerViewEmbeded) {
+                [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+            }
+            else {
+                [self addSubview:_headerView];
+            }
             self.dockingHeight = _dockingHeight;
         }
     }
@@ -253,9 +256,14 @@ static void *observerContext = &observerContext;
                 }
 
                 UIEdgeInsets inset = obj.contentInset;
-                CGFloat delta = inset.top - self.headerViewHeight;
+                CGFloat delta = inset.top - self.dockingHeight;
                 inset.top = self.dockingHeight;
 
+                CGPoint offset = obj.contentOffset;
+                offset.y = MAX(offset.y + delta, - self.dockingHeight);
+
+                // Must change offset first!
+                obj.contentOffset = offset;
                 obj.contentInset = inset;
             }
             else {
@@ -291,6 +299,17 @@ static void *observerContext = &observerContext;
                     tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
                                                                     originalTableHeaderView:tableView.mc_originalTableHeaderView];
                 }
+
+                UIEdgeInsets inset = obj.contentInset;
+                CGFloat delta = inset.top;
+                inset.top = 0.f;
+
+                CGPoint offset = obj.contentOffset;
+                offset.y = MAX(offset.y + delta, 0);
+
+                // Must change offset first!
+                obj.contentOffset = offset;
+                obj.contentInset = inset;
             }
             else {
                 UIEdgeInsets inset = obj.contentInset;
@@ -419,12 +438,7 @@ static void *observerContext = &observerContext;
     }];
 
     if (_headerView)
-        [self bringSubviewToFront:_headerView];
-}
-
-- (void)updateContents
-{
-
+        [_headerView.superview bringSubviewToFront:_headerView];
 }
 
 - (void)_notifySelectionChanged
