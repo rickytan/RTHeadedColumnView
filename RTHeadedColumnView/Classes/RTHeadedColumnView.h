@@ -25,7 +25,7 @@ IB_DESIGNABLE
 
 @property (nonatomic, weak, nullable) IBOutlet id<RTHeadedColumnViewDelegate> delegate;
 
-@property (nonatomic, strong, nullable) UIView *headerView;
+@property (nonatomic, strong, nullable) __kindof UIView *headerView;
 @property (nonatomic, assign) IBInspectable BOOL headerBounce;
 @property (nonatomic, assign) IBInspectable BOOL headerViewEmbeded;
 @property (nonatomic, assign) IBInspectable BOOL automaticallyAdjustsScrollViewInsets;

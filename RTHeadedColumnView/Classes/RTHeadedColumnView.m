@@ -103,7 +103,7 @@ static void *observerContext = &observerContext;
         else {
             if (self.headerBounce) {
                 if (self.headerViewEmbeded) {
-                    self.headerView.frame = CGRectMake(0, -self.headerViewHeight, self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.dockingHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
@@ -111,7 +111,7 @@ static void *observerContext = &observerContext;
             }
             else {
                 if (self.headerViewEmbeded) {
-                    self.headerView.frame = CGRectMake(0, -self.headerViewHeight, self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
@@ -236,16 +236,40 @@ static void *observerContext = &observerContext;
 
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         if (self.headerViewEmbeded) {
-            UIEdgeInsets inset = obj.contentInset;
-            CGFloat delta = inset.top - self.headerViewHeight;
-            inset.top = self.headerViewHeight;
+            if ([obj isKindOfClass:[UITableView class]]) {
+                UITableView *tableView = (UITableView *)obj;
+                if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
+                    UIView *tableHeader = tableView.tableHeaderView;
+                    tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
-            CGPoint offset = obj.contentOffset;
-            offset.y = MAX(offset.y + delta, - self.headerViewHeight);
+                    tableView.mc_originalTableHeaderView = tableHeader;
+                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
+                                                                    originalTableHeaderView:tableHeader];
+                }
+                else {
+                    tableView.tableHeaderView = nil;
+                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
+                                                                    originalTableHeaderView:tableView.mc_originalTableHeaderView];
+                }
 
-            // Must change offset first!
-            obj.contentOffset = offset;
-            obj.contentInset = inset;
+                UIEdgeInsets inset = obj.contentInset;
+                CGFloat delta = inset.top - self.headerViewHeight;
+                inset.top = self.dockingHeight;
+
+                obj.contentInset = inset;
+            }
+            else {
+                UIEdgeInsets inset = obj.contentInset;
+                CGFloat delta = inset.top - self.headerViewHeight;
+                inset.top = self.headerViewHeight;
+
+                CGPoint offset = obj.contentOffset;
+                offset.y = MAX(offset.y + delta, - self.headerViewHeight);
+
+                // Must change offset first!
+                obj.contentOffset = offset;
+                obj.contentInset = inset;
+            }
 
             if (self.automaticallyAdjustsScrollViewInsets) {
                 obj.scrollIndicatorInsets = UIEdgeInsetsZero;
@@ -403,33 +427,10 @@ static void *observerContext = &observerContext;
 
 }
 
-#pragma mark - UIScrollView Delegate
-
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
-
-}
-
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
-                  willDecelerate:(BOOL)decelerate
-{
-    if (!decelerate) {
-        CGFloat width = self.bounds.size.width;
-        _selectedColumn = (NSInteger)floorf((scrollView.contentOffset.x + width / 2) / width);
-        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-            obj.scrollsToTop = idx == _selectedColumn;
-        }];
-
-        if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
-            [self.delegate columnView:self didDisplayColumn:_selectedColumn];
-        }
-    }
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+- (void)_notifySelectionChanged
 {
     CGFloat width = self.bounds.size.width;
-    _selectedColumn = (NSInteger)floorf((scrollView.contentOffset.x + width / 2) / width);
+    _selectedColumn = (NSInteger)floorf((_scrollView.contentOffset.x + width / 2) / width);
     [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         obj.scrollsToTop = idx == _selectedColumn;
     }];
@@ -437,6 +438,38 @@ static void *observerContext = &observerContext;
     if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
         [self.delegate columnView:self didDisplayColumn:_selectedColumn];
     }
+
+    if (self.headerViewEmbeded) {
+        CGRect rect = [self.headerView convertRect:self.headerView.bounds
+                                            toView:self.contentColumns[self.selectedColumn]];
+        self.headerView.frame = rect;
+        [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+    }
+}
+
+#pragma mark - UIScrollView Delegate
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    if (self.headerViewEmbeded) {
+        CGRect rect = [self.headerView convertRect:self.headerView.bounds
+                                            toView:self];
+        self.headerView.frame = rect;
+        [self addSubview:self.headerView];
+    }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
+                  willDecelerate:(BOOL)decelerate
+{
+    if (!decelerate) {
+        [self _notifySelectionChanged];
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    [self _notifySelectionChanged];
 }
 
 - (void)setCurrentOffset:(CGFloat)currentOffset
