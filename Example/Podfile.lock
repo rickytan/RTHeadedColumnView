@@ -6,9 +6,11 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   RTHeadedColumnView:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   RTHeadedColumnView: e5e8d35356deeba98a37858362f1eb349d1a8b8f
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: 4abdb67e3769674b0c3b6a1dc2a33f8504677783
+
+COCOAPODS: 1.1.1

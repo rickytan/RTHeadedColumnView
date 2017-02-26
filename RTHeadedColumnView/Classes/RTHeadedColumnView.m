@@ -1,39 +1,53 @@
+// RTHeadedColumnView.m
 //
-//  MZMultiColumnView.m
-//  meizhuang
+// Copyright (c) 2017 rickytan
 //
-//  Created by Ricky on 16/8/6.
-//  Copyright © 2016年 netease. All rights reserved.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
 #import <objc/runtime.h>
 
 #import "RTHeadedColumnView.h"
 
 @interface UITableView (MultiColumnView)
-@property (nonatomic, strong) UIView *mc_originalTableHeaderView;
+@property (nonatomic, strong) UIView *rt_originalTableHeaderView;
 @end
 
 @implementation UITableView (MultiColumnView)
-@dynamic mc_originalTableHeaderView;
+@dynamic rt_originalTableHeaderView;
 
-- (void)setMc_originalTableHeaderView:(UIView *)mc_originalTableHeaderView
+- (void)setRt_originalTableHeaderView:(UIView *)rt_originalTableHeaderView
 {
-    objc_setAssociatedObject(self, @selector(mc_originalTableHeaderView), mc_originalTableHeaderView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, @selector(rt_originalTableHeaderView), rt_originalTableHeaderView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (UIView *)mc_originalTableHeaderView
+- (UIView *)rt_originalTableHeaderView
 {
-    return (UIView *)objc_getAssociatedObject(self, @selector(mc_originalTableHeaderView));
+    return (UIView *)objc_getAssociatedObject(self, @selector(rt_originalTableHeaderView));
 }
 
 @end
 
 
-@interface MZMultiColumnTableHeaderPlaceholderView : UIView
+@interface __RTTableHeaderPlaceholderView : UIView
 @end
 
-@implementation MZMultiColumnTableHeaderPlaceholderView
+@implementation __RTTableHeaderPlaceholderView
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -55,7 +69,7 @@
 static void *observerContext = &observerContext;
 
 @implementation RTHeadedColumnView
-@synthesize dockingHeight = _dockingHeight;
+@synthesize headerPinHeight = _headerPinHeight;
 @synthesize headerViewHeight = _headerViewHeight;
 
 - (void)dealloc
@@ -69,7 +83,7 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.automaticallyAdjustsScrollViewInsets = YES;
+        self.automaticallyAdjustsScrollIndicatorInsets = YES;
     }
     return self;
 }
@@ -87,26 +101,26 @@ static void *observerContext = &observerContext;
         CGFloat offset = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         self.currentOffset = offset + top;
 
-        if (offset + top > self.headerViewHeight - self.dockingHeight) {
+        if (offset + top > self.headerViewHeight - self.headerPinHeight) {
             if (self.headerViewEmbeded) {
-                self.headerView.frame = CGRectMake(0, offset - (self.headerViewHeight - self.dockingHeight), self.bounds.size.width, self.headerViewHeight);
+                self.headerView.frame = CGRectMake(0, offset - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
             else {
-                self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.dockingHeight), self.bounds.size.width, self.headerViewHeight);
+                self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
-                    obj.contentOffset = CGPointMake(0, MAX(obj.contentOffset.y, self.headerViewHeight - self.dockingHeight - obj.contentInset.top));
+                    obj.contentOffset = CGPointMake(0, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
                 }
             }];
         }
         else {
-            if (self.headerBounce) {
+            if (self.headerViewBounce) {
                 if (self.headerViewEmbeded) {
                     self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
-                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.dockingHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.headerPinHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
                 }
             }
             else {
@@ -159,7 +173,7 @@ static void *observerContext = &observerContext;
         [_headerView removeFromSuperview];
         _headerView = nil;
         self.headerViewHeight = 0;
-        self.dockingHeight = 0;
+        self.headerPinHeight = 0;
     }
 }
 
@@ -195,7 +209,7 @@ static void *observerContext = &observerContext;
             else {
                 [self addSubview:_headerView];
             }
-            self.dockingHeight = _dockingHeight;
+            self.headerPinHeight = _headerPinHeight;
         }
     }
 }
@@ -208,7 +222,7 @@ static void *observerContext = &observerContext;
         CGRect rect = self.headerView.frame;
         rect.size.height = headerViewHeight;
         self.headerView.frame = rect;
-        self.dockingHeight = _dockingHeight;
+        self.headerPinHeight = _headerPinHeight;
     }
 }
 
@@ -233,34 +247,34 @@ static void *observerContext = &observerContext;
                      }];
 }
 
-- (void)setDockingHeight:(CGFloat)dockingHeight
+- (void)setHeaderPinHeight:(CGFloat)headerPinHeight
 {
-    _dockingHeight = dockingHeight;
+    _headerPinHeight = headerPinHeight;
 
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         if (self.headerViewEmbeded) {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
-                if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
+                if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
-                    tableView.mc_originalTableHeaderView = tableHeader;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableHeader];
+                    tableView.rt_originalTableHeaderView = tableHeader;
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableHeader];
                 }
                 else {
                     tableView.tableHeaderView = nil;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableView.mc_originalTableHeaderView];
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
 
                 UIEdgeInsets inset = obj.contentInset;
-                CGFloat delta = inset.top - self.dockingHeight;
-                inset.top = self.dockingHeight;
+                CGFloat delta = inset.top - self.headerPinHeight;
+                inset.top = self.headerPinHeight;
 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.dockingHeight);
+                offset.y = MAX(offset.y + delta, - self.headerPinHeight);
 
                 // Must change offset first!
                 obj.contentOffset = offset;
@@ -279,25 +293,25 @@ static void *observerContext = &observerContext;
                 obj.contentInset = inset;
             }
 
-            if (self.automaticallyAdjustsScrollViewInsets) {
+            if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 obj.scrollIndicatorInsets = UIEdgeInsetsZero;
             }
         }
         else {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
-                if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
+                if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
-                    tableView.mc_originalTableHeaderView = tableHeader;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableHeader];
+                    tableView.rt_originalTableHeaderView = tableHeader;
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableHeader];
                 }
                 else {
                     tableView.tableHeaderView = nil;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableView.mc_originalTableHeaderView];
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
 
                 UIEdgeInsets inset = obj.contentInset;
@@ -313,20 +327,20 @@ static void *observerContext = &observerContext;
             }
             else {
                 UIEdgeInsets inset = obj.contentInset;
-                CGFloat delta = inset.top - (self.headerViewHeight - self.dockingHeight);
-                inset.top = self.headerViewHeight - self.dockingHeight;
+                CGFloat delta = inset.top - (self.headerViewHeight - self.headerPinHeight);
+                inset.top = self.headerViewHeight - self.headerPinHeight;
 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.dockingHeight));
+                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
 
                 // Must change offset first!
                 obj.contentOffset = offset;
                 obj.contentInset = inset;
             }
 
-            if (self.automaticallyAdjustsScrollViewInsets) {
+            if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 UIEdgeInsets inset = obj.scrollIndicatorInsets;
-                inset.top = self.headerViewHeight - self.dockingHeight;
+                inset.top = self.headerViewHeight - self.headerPinHeight;
                 obj.scrollIndicatorInsets = inset;
             }
         }
@@ -334,18 +348,18 @@ static void *observerContext = &observerContext;
     [self setNeedsLayout];
 }
 
-- (CGFloat)dockingHeight
+- (CGFloat)headerPinHeight
 {
     if (self.headerView) {
-        return MIN(_dockingHeight, _headerViewHeight);
+        return MIN(_headerPinHeight, _headerViewHeight);
     }
     return 0.f;
 }
 
-- (UIView *)createPlaceholderHeaderViewWithHeight:(CGFloat)height
-                          originalTableHeaderView:(UIView *)tableHeader
+- (UIView *)_createPlaceholderHeaderViewWithHeight:(CGFloat)height
+                           originalTableHeaderView:(UIView *)tableHeader
 {
-    UIView *view = [[MZMultiColumnTableHeaderPlaceholderView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), height + CGRectGetHeight(tableHeader.bounds))];
+    UIView *view = [[__RTTableHeaderPlaceholderView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), height + CGRectGetHeight(tableHeader.bounds))];
     if (tableHeader) {
         tableHeader.frame = CGRectMake(0,
                                        CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds),
@@ -375,33 +389,33 @@ static void *observerContext = &observerContext;
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
-                if (![tableView.tableHeaderView isKindOfClass:[MZMultiColumnTableHeaderPlaceholderView class]]) {
+                if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
 
-                    tableView.mc_originalTableHeaderView = tableHeader;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableHeader];
+                    tableView.rt_originalTableHeaderView = tableHeader;
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableHeader];
                 }
                 else {
                     tableView.tableHeaderView = nil;
-                    tableView.tableHeaderView = [self createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.dockingHeight
-                                                                    originalTableHeaderView:tableView.mc_originalTableHeaderView];
+                    tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
+                                                                     originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
             }
             else {
                 UIEdgeInsets inset = obj.contentInset;
-                inset.top = self.headerViewHeight - self.dockingHeight;
+                inset.top = self.headerViewHeight - self.headerPinHeight;
                 obj.contentInset = inset;
 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y, -(self.headerViewHeight - self.dockingHeight));
+                offset.y = MAX(offset.y, -(self.headerViewHeight - self.headerPinHeight));
                 obj.contentOffset = offset;
             }
 
-            if (self.automaticallyAdjustsScrollViewInsets) {
+            if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 UIEdgeInsets inset = obj.scrollIndicatorInsets;
-                inset.top = self.headerViewHeight - self.dockingHeight;
+                inset.top = self.headerViewHeight - self.headerPinHeight;
                 obj.scrollIndicatorInsets = inset;
             }
 
@@ -427,7 +441,7 @@ static void *observerContext = &observerContext;
     }
     else {
         CGRect slice, remainder;
-        CGRectDivide(self.bounds, &slice, &remainder, self.dockingHeight, CGRectMinYEdge);
+        CGRectDivide(self.bounds, &slice, &remainder, self.headerPinHeight, CGRectMinYEdge);
 
         _scrollView.frame = remainder;
     }

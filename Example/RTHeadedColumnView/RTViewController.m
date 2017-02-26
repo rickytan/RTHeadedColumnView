@@ -50,7 +50,7 @@
     [self.view addSubview:self.columnView];
 
     self.columnView.headerView = headerView;
-    self.columnView.dockingHeight = 44.f;
+    self.columnView.headerPinHeight = 44.f;
     self.columnView.contentColumns = @[[RTDemoTableView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
 }
 
@@ -94,11 +94,11 @@
     [self.view addSubview:self.columnView];
 
     self.columnView.headerView = headerView;
-    self.columnView.dockingHeight = 44.f;
+    self.columnView.headerPinHeight = 44.f;
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        self.columnView.dockingHeight = 80.f;
+        self.columnView.headerPinHeight = 80.f;
     });
 }
 
@@ -181,7 +181,7 @@
 
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
     self.columnView.headerView = headerView;
-    self.columnView.dockingHeight = 44.f;
+    self.columnView.headerPinHeight = 44.f;
 }
 
 - (void)onHeaderHeight:(UIStepper *)stepper
@@ -191,7 +191,7 @@
 
 - (void)onDockingHeight:(UIStepper *)stepper
 {
-    self.columnView.dockingHeight = stepper.value;
+    self.columnView.headerPinHeight = stepper.value;
 }
 
 - (void)onEmbed:(UISwitch *)toggle
