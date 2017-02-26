@@ -27,6 +27,7 @@ IB_DESIGNABLE
 
 @property (nonatomic, strong, nullable) UIView *headerView;
 @property (nonatomic, assign) IBInspectable BOOL headerBounce;
+@property (nonatomic, assign) IBInspectable BOOL headerViewEmbeded;
 @property (nonatomic, assign) IBInspectable BOOL automaticallyAdjustsScrollViewInsets;
 
 @property (nonatomic, assign) IBInspectable CGFloat headerViewHeight;
