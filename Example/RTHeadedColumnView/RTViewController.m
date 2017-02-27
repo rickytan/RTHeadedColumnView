@@ -135,7 +135,7 @@
     bottomView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
 
     CGRect slice, remainder;
-    CGRectDivide(headerView.bounds, &slice, &remainder, 44.f, CGRectMaxYEdge);
+    CGRectDivide(headerView.bounds, &slice, &remainder, 40.f, CGRectMaxYEdge);
     bottomView.frame = slice;
     imageView.frame = remainder;
 
@@ -159,7 +159,7 @@
                               stepper.minimumValue = 0;
                               stepper.maximumValue = 320;
                               stepper.stepValue = 10;
-                              stepper.value = 44.f;
+                              stepper.value = 40.f;
                               [stepper addTarget:self
                                           action:@selector(onDockingHeight:)
                                 forControlEvents:UIControlEventValueChanged];
@@ -188,7 +188,7 @@
 
     self.columnView.contentColumns = @[[RTDemoCollectionView new], [RTHeaderDemoTableView new], [RTDemoTableView new]];
     self.columnView.headerView = headerView;
-    self.columnView.headerPinHeight = 44.f;
+    self.columnView.headerPinHeight = 40.f;
 }
 
 - (void)onHeaderHeight:(UIStepper *)stepper

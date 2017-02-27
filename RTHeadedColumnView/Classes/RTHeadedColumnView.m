@@ -127,7 +127,7 @@ static void *observerContext = &observerContext;
             }
             else {
                 if (self.headerViewBounce) {
-                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight - self.headerPinHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
@@ -190,12 +190,12 @@ static void *observerContext = &observerContext;
 {
     if (_selectedColumn != selectedColumn) {
         _selectedColumn = selectedColumn;
-        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-            obj.scrollsToTop = idx == _selectedColumn;
-        }];
 
         [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * _selectedColumn, 0)
                                  animated:animated];
+        [self _updateScrollsToTop];
+
+        self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
     }
 }
 
@@ -476,23 +476,34 @@ static void *observerContext = &observerContext;
     return view;
 }
 
-- (void)_notifySelectionChanged
+- (void)_updateScrollsToTop
 {
-    CGFloat width = self.bounds.size.width;
-    _selectedColumn = (NSInteger)floorf((_scrollView.contentOffset.x + width / 2) / width);
     [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         obj.scrollsToTop = idx == _selectedColumn;
     }];
+}
 
-    if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
-        [self.delegate columnView:self didDisplayColumn:_selectedColumn];
-    }
+- (void)_notifySelectionChanged
+{
+    CGFloat width = self.bounds.size.width;
+    NSInteger newSelection = (NSInteger)floorf((_scrollView.contentOffset.x + width / 2) / width);
+    if (newSelection != _selectedColumn) {
+        _selectedColumn = newSelection;
 
-    if (self.headerViewEmbeded) {
-        CGRect rect = [self.headerView convertRect:self.headerView.bounds
-                                            toView:self.contentColumns[self.selectedColumn]];
-        self.headerView.frame = rect;
-        [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+        [self _updateScrollsToTop];
+
+        if (self.headerViewEmbeded) {
+            CGRect rect = [self.headerView convertRect:self.headerView.bounds
+                                                toView:self.contentColumns[self.selectedColumn]];
+            self.headerView.frame = rect;
+            [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+        }
+
+        if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
+            [self.delegate columnView:self didDisplayColumn:_selectedColumn];
+        }
+
+        self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
     }
 }
 
