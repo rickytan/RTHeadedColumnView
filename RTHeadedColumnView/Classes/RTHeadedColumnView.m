@@ -453,6 +453,7 @@ static void *observerContext = &observerContext;
     }
 
     _scrollView.contentSize = CGSizeMake(width * self.contentColumns.count, 0);
+    _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         obj.frame = CGRectMake(width * idx, 0, width, _scrollView.bounds.size.height);
     }];
@@ -483,6 +484,26 @@ static void *observerContext = &observerContext;
     }];
 }
 
+- (void)_detachHeaderView
+{
+    if (self.headerViewEmbeded) {
+        CGRect rect = [self.headerView convertRect:self.headerView.bounds
+                                            toView:self];
+        self.headerView.frame = rect;
+        [self addSubview:self.headerView];
+    }
+}
+
+- (void)_attachHeaderView
+{
+    if (self.headerViewEmbeded) {
+        CGRect rect = [self.headerView convertRect:self.headerView.bounds
+                                            toView:self.contentColumns[self.selectedColumn]];
+        self.headerView.frame = rect;
+        [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+    }
+}
+
 - (void)_notifySelectionChanged
 {
     CGFloat width = self.bounds.size.width;
@@ -491,13 +512,6 @@ static void *observerContext = &observerContext;
         _selectedColumn = newSelection;
 
         [self _updateScrollsToTop];
-
-        if (self.headerViewEmbeded) {
-            CGRect rect = [self.headerView convertRect:self.headerView.bounds
-                                                toView:self.contentColumns[self.selectedColumn]];
-            self.headerView.frame = rect;
-            [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
-        }
 
         if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
             [self.delegate columnView:self didDisplayColumn:_selectedColumn];
@@ -511,12 +525,7 @@ static void *observerContext = &observerContext;
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
-    if (self.headerViewEmbeded) {
-        CGRect rect = [self.headerView convertRect:self.headerView.bounds
-                                            toView:self];
-        self.headerView.frame = rect;
-        [self addSubview:self.headerView];
-    }
+    [self _detachHeaderView];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
@@ -524,12 +533,14 @@ static void *observerContext = &observerContext;
 {
     if (!decelerate) {
         [self _notifySelectionChanged];
+        [self _attachHeaderView];
     }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
     [self _notifySelectionChanged];
+    [self _attachHeaderView];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

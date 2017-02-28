@@ -36,7 +36,7 @@ TODO: Add long description of the pod here.
   #   'RTHeadedColumnView' => ['RTHeadedColumnView/Assets/*.png']
   # }
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
+  s.public_header_files = 'RTHeadedColumnView/Classes/**/*.h'
   s.frameworks = 'UIKit'
   # s.dependency 'AFNetworking', '~> 2.3'
 end
