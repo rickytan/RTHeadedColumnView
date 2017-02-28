@@ -78,6 +78,10 @@ static void *observerContext = &observerContext;
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         [obj removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
     }];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationWillChangeStatusBarOrientationNotification
+                                                  object:nil];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -86,6 +90,20 @@ static void *observerContext = &observerContext;
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
         self.automaticallyAdjustsScrollIndicatorInsets = YES;
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onRotation:)
+                                                     name:UIApplicationWillChangeStatusBarOrientationNotification
+                                                   object:nil];
+    }
+    return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+
     }
     return self;
 }
@@ -163,6 +181,7 @@ static void *observerContext = &observerContext;
     if (headerView) {
         [_headerView removeFromSuperview];
         _headerView = headerView;
+        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
         if (self.headerViewEmbeded) {
             [self.contentColumns[self.selectedColumn] addSubview:_headerView];
         }
@@ -471,7 +490,7 @@ static void *observerContext = &observerContext;
                                        CGRectGetHeight(view.bounds) - CGRectGetHeight(tableHeader.bounds),
                                        CGRectGetWidth(view.bounds),
                                        CGRectGetHeight(tableHeader.bounds));
-        tableHeader.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+        tableHeader.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [view addSubview:tableHeader];
     }
     return view;
@@ -519,6 +538,11 @@ static void *observerContext = &observerContext;
 
         self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
     }
+}
+
+- (void)onRotation:(NSNotification *)notification
+{
+    [self _attachHeaderView];
 }
 
 #pragma mark - UIScrollView Delegate

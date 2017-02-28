@@ -39,7 +39,7 @@ IB_DESIGNABLE
 @property (nonatomic, weak, nullable) IBOutlet id<RTHeadedColumnViewDelegate> delegate;
 // DO NOT change its delegate, it is used internally!
 @property (nonatomic, readonly) UIScrollView *scrollView;
-@property (nonatomic, strong, nullable) __kindof UIView *headerView;
+@property (nonatomic, strong, nullable) IBOutlet __kindof UIView *headerView;
 @property (nonatomic) IBInspectable BOOL headerViewBounce;
 
 /*!
