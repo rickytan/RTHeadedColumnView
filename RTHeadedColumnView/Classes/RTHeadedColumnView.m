@@ -65,6 +65,7 @@
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat currentOffset;
 @property (nonatomic) BOOL ignoreOffsetChangeNotify;
+@property (nonatomic) BOOL ignoreOffsetChangeObserve;
 @end
 
 static void *observerContext = &observerContext;
@@ -72,13 +73,14 @@ static void *observerContext = &observerContext;
 @implementation RTHeadedColumnView
 @synthesize headerPinHeight = _headerPinHeight;
 @synthesize headerViewHeight = _headerViewHeight;
+@synthesize contentColumns = _contentColumns;
 
 - (void)dealloc
 {
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         [obj removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
     }];
-
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UIApplicationWillChangeStatusBarOrientationNotification
                                                   object:nil];
@@ -90,7 +92,7 @@ static void *observerContext = &observerContext;
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
         self.automaticallyAdjustsScrollIndicatorInsets = YES;
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onRotation:)
                                                      name:UIApplicationWillChangeStatusBarOrientationNotification
@@ -103,7 +105,7 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-
+        
     }
     return self;
 }
@@ -113,29 +115,32 @@ static void *observerContext = &observerContext;
                         change:(NSDictionary<NSString *,id> *)change
                        context:(void *)context
 {
-    if (context == observerContext) {
+    if (context == observerContext && !self.ignoreOffsetChangeObserve) {
         if (self.contentColumns[self.selectedColumn] != object) {
             return;
         }
         CGFloat top = ((UIScrollView *)object).contentInset.top;
         CGFloat offset = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         self.currentOffset = offset + top;
-
+        
         if (self.currentOffset > self.headerViewHeight - self.headerPinHeight) {
-            if (self.headerViewEmbeded) {
+            if (self.headerView.superview != self) {
                 self.headerView.frame = CGRectMake(0, offset - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
             else {
                 self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
+            
+            self.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
                     obj.contentOffset = CGPointMake(0, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
                 }
             }];
+            self.ignoreOffsetChangeObserve = NO;
         }
         else {
-            if (self.headerViewEmbeded) {
+            if (self.headerView.superview != self) {
                 if (self.headerViewBounce) {
                     self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
                 }
@@ -151,11 +156,14 @@ static void *observerContext = &observerContext;
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
                 }
             }
+            
+            self.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
                     obj.contentOffset = CGPointMake(0, offset + top - obj.contentInset.top);
                 }
             }];
+            self.ignoreOffsetChangeObserve = NO;
         }
     }
 }
@@ -209,11 +217,11 @@ static void *observerContext = &observerContext;
 {
     if (_selectedColumn != selectedColumn) {
         _selectedColumn = selectedColumn;
-
+        
         [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * _selectedColumn, 0)
                                  animated:animated];
         [self _updateScrollsToTop];
-
+        
         self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
     }
 }
@@ -222,7 +230,7 @@ static void *observerContext = &observerContext;
 {
     if (_headerViewEmbeded != headerViewEmbeded) {
         _headerViewEmbeded = headerViewEmbeded;
-
+        
         if (self.headerView) {
             if (_headerViewEmbeded) {
                 [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
@@ -239,7 +247,7 @@ static void *observerContext = &observerContext;
 {
     if (_headerViewHeight != headerViewHeight) {
         _headerViewHeight = headerViewHeight;
-
+        
         CGRect rect = self.headerView.frame;
         rect.size.height = headerViewHeight;
         self.headerView.frame = rect;
@@ -264,14 +272,14 @@ static void *observerContext = &observerContext;
                          self.headerViewHeight = headerViewHeight;
                      }
                      completion:^(BOOL finished) {
-
+                         
                      }];
 }
 
 - (void)setHeaderPinHeight:(CGFloat)headerPinHeight
 {
     _headerPinHeight = headerPinHeight;
-
+    
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         if (self.headerViewEmbeded) {
             if ([obj isKindOfClass:[UITableView class]]) {
@@ -279,7 +287,7 @@ static void *observerContext = &observerContext;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
-
+                    
                     tableView.rt_originalTableHeaderView = tableHeader;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableHeader];
@@ -289,14 +297,14 @@ static void *observerContext = &observerContext;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
-
+                
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - self.headerPinHeight;
                 inset.top = self.headerPinHeight;
-
+                
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - self.headerPinHeight);
-
+                
                 // Must change offset first!
                 self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
@@ -307,17 +315,17 @@ static void *observerContext = &observerContext;
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - self.headerViewHeight;
                 inset.top = self.headerViewHeight;
-
+                
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - self.headerViewHeight);
-
+                
                 // Must change offset first!
                 self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
                 self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
-
+            
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 obj.scrollIndicatorInsets = UIEdgeInsetsZero;
             }
@@ -328,7 +336,7 @@ static void *observerContext = &observerContext;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
-
+                    
                     tableView.rt_originalTableHeaderView = tableHeader;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableHeader];
@@ -338,14 +346,14 @@ static void *observerContext = &observerContext;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
-
+                
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top;
                 inset.top = 0.f;
-
+                
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, 0);
-
+                
                 // Must change offset first!
                 self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
@@ -356,17 +364,17 @@ static void *observerContext = &observerContext;
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - (self.headerViewHeight - self.headerPinHeight);
                 inset.top = self.headerViewHeight - self.headerPinHeight;
-
+                
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
-
+                
                 // Must change offset first!
                 self.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
                 self.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
-
+            
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 UIEdgeInsets inset = obj.scrollIndicatorInsets;
                 inset.top = self.headerViewHeight - self.headerPinHeight;
@@ -399,25 +407,35 @@ static void *observerContext = &observerContext;
 - (void)setContentColumns:(NSArray<__kindof UIScrollView *> *)contentColumns
 {
     if (![_contentColumns isEqualToArray:contentColumns]) {
+        [self _detachHeaderView];
+        
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             [obj removeFromSuperview];
             [obj removeObserver:self
                      forKeyPath:NSStringFromSelector(@selector(contentOffset))
                         context:observerContext];
         }];
-
+        
         _contentColumns = contentColumns;
-
-        CGFloat width = self.bounds.size.width;
-        CGFloat height = self.bounds.size.height;
-
+        
+        if (contentColumns.count) {
+            _selectedColumn = MIN(_selectedColumn, contentColumns.count - 1);
+        }
+        else {
+            _contentColumns = nil;
+            _selectedColumn = NSNotFound;
+        }
+        
+        CGFloat width = self.scrollView.bounds.size.width;
+        CGFloat height = self.scrollView.bounds.size.height;
+        
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
-
+                    
                     tableView.rt_originalTableHeaderView = tableHeader;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableHeader];
@@ -427,39 +445,69 @@ static void *observerContext = &observerContext;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
+                
+                if (self.headerViewEmbeded) {
+                    UIEdgeInsets inset = obj.contentInset;
+                    inset.top = self.headerPinHeight;
+                    obj.contentInset = inset;
+                }
+                else {
+                    UIEdgeInsets inset = obj.contentInset;
+                    inset.top = 0.f;
+                    obj.contentInset = inset;
+                }
             }
             else {
-                UIEdgeInsets inset = obj.contentInset;
-                inset.top = self.headerViewHeight - self.headerPinHeight;
-                obj.contentInset = inset;
-
-                CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y, -(self.headerViewHeight - self.headerPinHeight));
-                obj.contentOffset = offset;
+                if (self.headerViewEmbeded) {
+                    UIEdgeInsets inset = obj.contentInset;
+                    inset.top = self.headerViewHeight;
+                    obj.contentInset = inset;
+                }
+                else {
+                    UIEdgeInsets inset = obj.contentInset;
+                    inset.top = self.headerViewHeight - self.headerPinHeight;
+                    obj.contentInset = inset;
+                }
             }
-
+            
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
-                UIEdgeInsets inset = obj.scrollIndicatorInsets;
-                inset.top = self.headerViewHeight - self.headerPinHeight;
-                obj.scrollIndicatorInsets = inset;
+                if (self.headerViewEmbeded) {
+                    obj.scrollIndicatorInsets = UIEdgeInsetsZero;
+                }
+                else {
+                    UIEdgeInsets inset = obj.scrollIndicatorInsets;
+                    inset.top = self.headerViewHeight - self.headerPinHeight;
+                    obj.scrollIndicatorInsets = inset;
+                }
             }
-
+            
             obj.frame = CGRectMake(width * idx, 0, width, height);
             obj.scrollsToTop = idx == _selectedColumn;
             [self.scrollView addSubview:obj];
-
+            
+            
             [obj addObserver:self
                   forKeyPath:NSStringFromSelector(@selector(contentOffset))
                      options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
                      context:observerContext];
         }];
+        
+        [self _attachHeaderView];
     }
+}
+
+- (NSArray<UIScrollView *> *)contentColumns
+{
+    if (_contentColumns.count == 0) {
+        self.contentColumns = @[[[UIScrollView alloc] init]];
+    }
+    return _contentColumns;
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-
+    
     CGFloat width = self.bounds.size.width;
     if (self.headerViewEmbeded) {
         _scrollView.frame = self.bounds;
@@ -467,16 +515,19 @@ static void *observerContext = &observerContext;
     else {
         CGRect slice, remainder;
         CGRectDivide(self.bounds, &slice, &remainder, self.headerPinHeight, CGRectMinYEdge);
-
+        
         _scrollView.frame = remainder;
     }
-
-    _scrollView.contentSize = CGSizeMake(width * self.contentColumns.count, 0);
+    
+    _scrollView.contentSize = CGSizeMake(width * _contentColumns.count, 0);
     _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-        obj.frame = CGRectMake(width * idx, 0, width, _scrollView.bounds.size.height);
+        CGRect rect = CGRectMake(width * idx, 0, width, _scrollView.bounds.size.height);
+        if (!CGRectEqualToRect(obj.frame, rect)) {
+            obj.frame = rect;
+        }
     }];
-
+    
     if (_headerView)
         [_headerView.superview bringSubviewToFront:_headerView];
 }
@@ -520,6 +571,7 @@ static void *observerContext = &observerContext;
                                             toView:self.contentColumns[self.selectedColumn]];
         self.headerView.frame = rect;
         [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+        [self.scrollView bringSubviewToFront:self.contentColumns[self.selectedColumn]];
     }
 }
 
@@ -529,13 +581,13 @@ static void *observerContext = &observerContext;
     NSInteger newSelection = (NSInteger)floorf((_scrollView.contentOffset.x + width / 2) / width);
     if (newSelection != _selectedColumn) {
         _selectedColumn = newSelection;
-
+        
         [self _updateScrollsToTop];
-
+        
         if ([self.delegate respondsToSelector:@selector(columnView:didDisplayColumn:)]) {
             [self.delegate columnView:self didDisplayColumn:_selectedColumn];
         }
-
+        
         self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
     }
 }

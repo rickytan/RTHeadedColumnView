@@ -38,7 +38,7 @@ IB_DESIGNABLE
 
 @property (nonatomic, weak, nullable) IBOutlet id<RTHeadedColumnViewDelegate> delegate;
 // DO NOT change its delegate, it is used internally!
-@property (nonatomic, readonly) UIScrollView *scrollView;
+@property (nonatomic, strong, readonly) UIScrollView *scrollView;
 @property (nonatomic, strong, nullable) IBOutlet __kindof UIView *headerView;
 @property (nonatomic) IBInspectable BOOL headerViewBounce;
 
@@ -76,7 +76,7 @@ IB_DESIGNABLE
 // The height of the @c headerView 's area which will always be visible despite content view scrolls
 @property (nonatomic, assign) IBInspectable CGFloat headerPinHeight;
 
-@property (nonatomic, strong, nullable) IBOutletCollection(UIScrollView) NSArray <__kindof UIScrollView *> *contentColumns;
+@property (nonatomic, strong, null_resettable) IBOutletCollection(UIScrollView) NSArray <__kindof UIScrollView *> *contentColumns;
 
 @property (nonatomic, assign) NSInteger selectedColumn;
 - (void)setSelectedColumn:(NSInteger)selectedColumn animated:(BOOL)animated;
