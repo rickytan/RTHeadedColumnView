@@ -5,6 +5,12 @@
 [![License](https://img.shields.io/cocoapods/l/RTHeadedColumnView.svg?style=flat)](http://cocoapods.org/pods/RTHeadedColumnView)
 [![Platform](https://img.shields.io/cocoapods/p/RTHeadedColumnView.svg?style=flat)](http://cocoapods.org/pods/RTHeadedColumnView)
 
+## Introduction
+### TL;DR
+![Demo](https://cloud.githubusercontent.com/assets/1250207/23513436/032b0806-ff9f-11e6-94b5-c8f244098dd3.gif)
+
+
+
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.

@@ -567,11 +567,12 @@ static void *observerContext = &observerContext;
 - (void)_attachHeaderView
 {
     if (self.headerViewEmbeded) {
+        UIScrollView *contentView = self.contentColumns[self.selectedColumn];
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
-                                            toView:self.contentColumns[self.selectedColumn]];
+                                            toView:contentView];
         self.headerView.frame = rect;
-        [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
-        [self.scrollView bringSubviewToFront:self.contentColumns[self.selectedColumn]];
+        [contentView addSubview:self.headerView];
+        [self.scrollView bringSubviewToFront:contentView];
     }
 }
 

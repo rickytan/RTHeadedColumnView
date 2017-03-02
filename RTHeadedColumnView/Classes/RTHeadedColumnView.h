@@ -68,14 +68,21 @@ IB_DESIGNABLE
  */
 @property (nonatomic, assign) IBInspectable BOOL automaticallyAdjustsScrollIndicatorInsets;
 
-// Used to change the height of @c headerView after @c headerView has set. When @c headerView has changes,
-// this property will also changed to @c headerView.frame.size.height
+/*!
+ Used to change the height of @c headerView after @c headerView has set. When @c headerView has changes,
+ this property will also changed to @code headerView.frame.size.height @endcode
+ */
 @property (nonatomic, assign) IBInspectable CGFloat headerViewHeight;
 - (void)setHeaderViewHeight:(CGFloat)height animated:(BOOL)animated;
-
-// The height of the @c headerView 's area which will always be visible despite content view scrolls
+/*!
+ The height of the @c headerView 's area which will always be visible despite content view scrolls
+ */
 @property (nonatomic, assign) IBInspectable CGFloat headerPinHeight;
 
+/*!
+ @note       This property will always return a non-nil value, even after set it to nil, because there is at least
+             one scrollview in the array
+ */
 @property (nonatomic, strong, null_resettable) IBOutletCollection(UIScrollView) NSArray <__kindof UIScrollView *> *contentColumns;
 
 @property (nonatomic, assign) NSInteger selectedColumn;
