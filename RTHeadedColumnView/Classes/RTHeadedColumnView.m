@@ -64,13 +64,18 @@
 @interface RTHeadedColumnView () <UIScrollViewDelegate>
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat currentOffset;
-@property (nonatomic) BOOL ignoreOffsetChangeNotify;
-@property (nonatomic) BOOL ignoreOffsetChangeObserve;
 @end
 
 static void *observerContext = &observerContext;
 
 @implementation RTHeadedColumnView
+{
+    struct {
+        BOOL ignoreOffsetChangeNotify:1;
+        BOOL ignoreOffsetChangeObserve:1;
+        BOOL ignoreLayoutSetContentOffset:1;
+    } _flags;
+}
 @synthesize headerPinHeight = _headerPinHeight;
 @synthesize headerViewHeight = _headerViewHeight;
 @synthesize contentColumns = _contentColumns;
@@ -94,7 +99,7 @@ static void *observerContext = &observerContext;
         self.automaticallyAdjustsScrollIndicatorInsets = YES;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(onRotation:)
+                                                 selector:@selector(onWillRotate:)
                                                      name:UIApplicationWillChangeStatusBarOrientationNotification
                                                    object:nil];
     }
@@ -115,7 +120,7 @@ static void *observerContext = &observerContext;
                         change:(NSDictionary<NSString *,id> *)change
                        context:(void *)context
 {
-    if (context == observerContext && !self.ignoreOffsetChangeObserve) {
+    if (context == observerContext && !self->_flags.ignoreOffsetChangeObserve) {
         if (self.contentColumns[self.selectedColumn] != object) {
             return;
         }
@@ -131,13 +136,13 @@ static void *observerContext = &observerContext;
                 self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
             
-            self.ignoreOffsetChangeObserve = YES;
+            self->_flags.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
                     obj.contentOffset = CGPointMake(0, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
                 }
             }];
-            self.ignoreOffsetChangeObserve = NO;
+            self->_flags.ignoreOffsetChangeObserve = NO;
         }
         else {
             if (self.headerView.superview != self) {
@@ -157,13 +162,13 @@ static void *observerContext = &observerContext;
                 }
             }
             
-            self.ignoreOffsetChangeObserve = YES;
+            self->_flags.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
                     obj.contentOffset = CGPointMake(0, offset + top - obj.contentInset.top);
                 }
             }];
-            self.ignoreOffsetChangeObserve = NO;
+            self->_flags.ignoreOffsetChangeObserve = NO;
         }
     }
 }
@@ -217,9 +222,17 @@ static void *observerContext = &observerContext;
 {
     if (_selectedColumn != selectedColumn) {
         _selectedColumn = selectedColumn;
+        [self _detachHeaderView];
         
+        if (animated) {
+            self->_flags.ignoreLayoutSetContentOffset = YES;
+        }
         [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * _selectedColumn, 0)
                                  animated:animated];
+        if (!animated) {
+            [self _attachHeaderView];
+        }
+        
         [self _updateScrollsToTop];
         
         self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
@@ -306,9 +319,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - self.headerPinHeight);
                 
                 // Must change offset first!
-                self.ignoreOffsetChangeNotify = YES;
+                self->_flags.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
-                self.ignoreOffsetChangeNotify = NO;
+                self->_flags.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             else {
@@ -320,9 +333,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - self.headerViewHeight);
                 
                 // Must change offset first!
-                self.ignoreOffsetChangeNotify = YES;
+                self->_flags.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
-                self.ignoreOffsetChangeNotify = NO;
+                self->_flags.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             
@@ -355,9 +368,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, 0);
                 
                 // Must change offset first!
-                self.ignoreOffsetChangeNotify = YES;
+                self->_flags.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
-                self.ignoreOffsetChangeNotify = NO;
+                self->_flags.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             else {
@@ -369,9 +382,9 @@ static void *observerContext = &observerContext;
                 offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
                 
                 // Must change offset first!
-                self.ignoreOffsetChangeNotify = YES;
+                self->_flags.ignoreOffsetChangeNotify = YES;
                 obj.contentOffset = offset;
-                self.ignoreOffsetChangeNotify = NO;
+                self->_flags.ignoreOffsetChangeNotify = NO;
                 obj.contentInset = inset;
             }
             
@@ -397,7 +410,7 @@ static void *observerContext = &observerContext;
 {
     if (_currentOffset != currentOffset) {
         _currentOffset = currentOffset;
-        if (!self.ignoreOffsetChangeNotify && [self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
+        if (!self->_flags.ignoreOffsetChangeNotify && [self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
             [self.delegate columnView:self
                     didScrollToOffset:UIOffsetMake(self.scrollView.contentOffset.x, self.currentOffset)];
         }
@@ -520,7 +533,9 @@ static void *observerContext = &observerContext;
     }
     
     _scrollView.contentSize = CGSizeMake(width * _contentColumns.count, 0);
-    _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
+    if (!self->_flags.ignoreLayoutSetContentOffset) {
+        _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
+    }
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         CGRect rect = CGRectMake(width * idx, 0, width, _scrollView.bounds.size.height);
         if (!CGRectEqualToRect(obj.frame, rect)) {
@@ -593,9 +608,10 @@ static void *observerContext = &observerContext;
     }
 }
 
-- (void)onRotation:(NSNotification *)notification
+- (void)onWillRotate:(NSNotification *)notification
 {
     [self _attachHeaderView];
+    self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
 }
 
 #pragma mark - UIScrollView Delegate
@@ -618,6 +634,13 @@ static void *observerContext = &observerContext;
 {
     [self _notifySelectionChanged];
     [self _attachHeaderView];
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    self->_flags.ignoreLayoutSetContentOffset = NO;
+    [self _attachHeaderView];
+    self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
