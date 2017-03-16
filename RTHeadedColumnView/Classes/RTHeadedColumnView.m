@@ -628,6 +628,7 @@ static void *observerContext = &observerContext;
                   willDecelerate:(BOOL)decelerate
 {
     if (!decelerate) {
+        self->_flags.ignoreLayoutSetContentOffset = NO;
         [self _notifySelectionChanged];
         [self _attachHeaderView];
     }
@@ -638,6 +639,7 @@ static void *observerContext = &observerContext;
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
+    self->_flags.ignoreLayoutSetContentOffset = NO;
     [self _notifySelectionChanged];
     [self _attachHeaderView];
 }
