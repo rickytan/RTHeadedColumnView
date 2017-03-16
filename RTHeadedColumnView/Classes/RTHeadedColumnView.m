@@ -629,6 +629,9 @@ static void *observerContext = &observerContext;
         [self _notifySelectionChanged];
         [self _attachHeaderView];
     }
+    else {
+        self->_flags.ignoreLayoutSetContentOffset = YES;
+    }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
