@@ -110,7 +110,11 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onWillRotate:)
+                                                     name:UIApplicationWillChangeStatusBarOrientationNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -261,10 +265,7 @@ static void *observerContext = &observerContext;
 {
     if (_headerViewHeight != headerViewHeight) {
         _headerViewHeight = headerViewHeight;
-        
-        CGRect rect = self.headerView.frame;
-        rect.size.height = headerViewHeight;
-        self.headerView.frame = rect;
+
         self.headerPinHeight = _headerPinHeight;
     }
 }
@@ -294,7 +295,7 @@ static void *observerContext = &observerContext;
 {
     _headerPinHeight = headerPinHeight;
     
-    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+    [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         if (self.headerViewEmbeded) {
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
@@ -507,6 +508,7 @@ static void *observerContext = &observerContext;
         }];
         
         [self _attachHeaderView];
+        [self setNeedsLayout];
     }
 }
 
