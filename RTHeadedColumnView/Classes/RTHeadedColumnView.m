@@ -170,6 +170,7 @@ static void *observerContext = &observerContext;
             }];
             self->_flags.ignoreOffsetChangeObserve = NO;
         }
+        [self.headerView.superview bringSubviewToFront:self.headerView];
     }
 }
 
