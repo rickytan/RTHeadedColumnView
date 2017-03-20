@@ -199,7 +199,7 @@ static void *observerContext = &observerContext;
     if (headerView) {
         [_headerView removeFromSuperview];
         _headerView = headerView;
-        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+//        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
         if (self.headerViewEmbeded) {
             [self.contentColumns[self.selectedColumn] addSubview:_headerView];
         }
@@ -465,11 +465,13 @@ static void *observerContext = &observerContext;
                     UIEdgeInsets inset = obj.contentInset;
                     inset.top = self.headerPinHeight;
                     obj.contentInset = inset;
+                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = obj.contentInset;
                     inset.top = 0.f;
                     obj.contentInset = inset;
+                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
             }
             else {
@@ -477,11 +479,13 @@ static void *observerContext = &observerContext;
                     UIEdgeInsets inset = obj.contentInset;
                     inset.top = self.headerViewHeight;
                     obj.contentInset = inset;
+                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = obj.contentInset;
                     inset.top = self.headerViewHeight - self.headerPinHeight;
                     obj.contentInset = inset;
+                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
             }
             
