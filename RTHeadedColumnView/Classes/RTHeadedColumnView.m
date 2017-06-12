@@ -82,6 +82,7 @@ static void *observerContext = &observerContext;
 
 - (void)dealloc
 {
+    _scrollView.delegate = nil;
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         [obj removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
     }];
@@ -189,6 +190,11 @@ static void *observerContext = &observerContext;
         _scrollView.showsHorizontalScrollIndicator = NO;
         _scrollView.showsVerticalScrollIndicator = NO;
         _scrollView.bounces = NO;
+#if __IPHONE_11_0 && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+        if ([_scrollView respondsToSelector:@selector(setContentInsetAdjustmentBehavior:)]) {
+            _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
+#endif
         [self addSubview:_scrollView];
     }
     return _scrollView;
