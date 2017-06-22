@@ -24,6 +24,24 @@
 
 #import "RTHeadedColumnView.h"
 
+@interface UIScrollView (MultiColumnView)
+@property (nonatomic, assign) UIEdgeInsets rt_originalContentInset;
+@end
+
+@implementation UIScrollView (MultiColumnView)
+
+- (void)setRt_originalContentInset:(UIEdgeInsets)rt_originalContentInset
+{
+    objc_setAssociatedObject(self, @selector(rt_originalContentInset), [NSValue valueWithUIEdgeInsets:rt_originalContentInset], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (UIEdgeInsets)rt_originalContentInset
+{
+    return [objc_getAssociatedObject(self, @selector(rt_originalContentInset)) UIEdgeInsetsValue];
+}
+
+@end
+
 @interface UITableView (MultiColumnView)
 @property (nonatomic, strong) UIView *rt_originalTableHeaderView;
 @end
@@ -111,7 +129,7 @@ static void *observerContext = &observerContext;
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(onWillRotate:)
                                                      name:UIApplicationWillChangeStatusBarOrientationNotification
@@ -175,7 +193,7 @@ static void *observerContext = &observerContext;
             }];
             self->_flags.ignoreOffsetChangeObserve = NO;
         }
-//        [self.headerView.superview bringSubviewToFront:self.headerView];
+        //        [self.headerView.superview bringSubviewToFront:self.headerView];
     }
 }
 
@@ -205,7 +223,7 @@ static void *observerContext = &observerContext;
     if (headerView) {
         [_headerView removeFromSuperview];
         _headerView = headerView;
-//        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+        //        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
         if (self.headerViewEmbeded) {
             [self.contentColumns[self.selectedColumn] addSubview:_headerView];
         }
@@ -271,7 +289,7 @@ static void *observerContext = &observerContext;
 {
     if (_headerViewHeight != headerViewHeight) {
         _headerViewHeight = headerViewHeight;
-
+        
         self.headerPinHeight = _headerPinHeight;
     }
 }
@@ -321,7 +339,7 @@ static void *observerContext = &observerContext;
                 
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - self.headerPinHeight;
-                inset.top = self.headerPinHeight;
+                inset.top = self.headerPinHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - self.headerPinHeight);
@@ -335,7 +353,7 @@ static void *observerContext = &observerContext;
             else {
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - self.headerViewHeight;
-                inset.top = self.headerViewHeight;
+                inset.top = self.headerViewHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - self.headerViewHeight);
@@ -370,7 +388,7 @@ static void *observerContext = &observerContext;
                 
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top;
-                inset.top = 0.f;
+                inset.top = obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, 0);
@@ -384,7 +402,7 @@ static void *observerContext = &observerContext;
             else {
                 UIEdgeInsets inset = obj.contentInset;
                 CGFloat delta = inset.top - (self.headerViewHeight - self.headerPinHeight);
-                inset.top = self.headerViewHeight - self.headerPinHeight;
+                inset.top = self.headerViewHeight - self.headerPinHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
                 offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
@@ -435,6 +453,7 @@ static void *observerContext = &observerContext;
             [obj removeObserver:self
                      forKeyPath:NSStringFromSelector(@selector(contentOffset))
                         context:observerContext];
+            obj.contentInset = obj.rt_originalContentInset;
         }];
         
         _contentColumns = contentColumns;
@@ -451,6 +470,8 @@ static void *observerContext = &observerContext;
         CGFloat height = self.scrollView.bounds.size.height;
         
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+            obj.rt_originalContentInset = obj.contentInset;
+            
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
@@ -469,13 +490,13 @@ static void *observerContext = &observerContext;
                 
                 if (self.headerViewEmbeded) {
                     UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerPinHeight;
+                    inset.top = self.headerPinHeight + obj.rt_originalContentInset.top;
                     obj.contentInset = inset;
                     obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = obj.contentInset;
-                    inset.top = 0.f;
+                    inset.top = obj.rt_originalContentInset.top;
                     obj.contentInset = inset;
                     obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
@@ -483,13 +504,13 @@ static void *observerContext = &observerContext;
             else {
                 if (self.headerViewEmbeded) {
                     UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerViewHeight;
+                    inset.top = self.headerViewHeight + obj.rt_originalContentInset.top;
                     obj.contentInset = inset;
                     obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerViewHeight - self.headerPinHeight;
+                    inset.top = self.headerViewHeight - self.headerPinHeight + obj.rt_originalContentInset.top;
                     obj.contentInset = inset;
                     obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
