@@ -342,7 +342,7 @@ static void *observerContext = &observerContext;
                 inset.top = self.headerPinHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerPinHeight);
+                offset.y = MAX(offset.y + delta, - self.headerPinHeight) - obj.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
@@ -356,7 +356,7 @@ static void *observerContext = &observerContext;
                 inset.top = self.headerViewHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerViewHeight);
+                offset.y = MAX(offset.y + delta, - self.headerViewHeight) - obj.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
@@ -391,7 +391,7 @@ static void *observerContext = &observerContext;
                 inset.top = obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, 0);
+                offset.y = MAX(offset.y + delta, 0) - obj.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
@@ -405,7 +405,7 @@ static void *observerContext = &observerContext;
                 inset.top = self.headerViewHeight - self.headerPinHeight + obj.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight));
+                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight)) - obj.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
