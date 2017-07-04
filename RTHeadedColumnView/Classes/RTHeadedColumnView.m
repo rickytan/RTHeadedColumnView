@@ -162,7 +162,7 @@ static void *observerContext = &observerContext;
             self->_flags.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
-                    obj.contentOffset = CGPointMake(0, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
+                    obj.contentOffset = CGPointMake(obj.contentOffset.x, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
                 }
             }];
             self->_flags.ignoreOffsetChangeObserve = NO;
@@ -188,7 +188,7 @@ static void *observerContext = &observerContext;
             self->_flags.ignoreOffsetChangeObserve = YES;
             [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
                 if (obj != object) {
-                    obj.contentOffset = CGPointMake(0, offset + top - obj.contentInset.top);
+                    obj.contentOffset = CGPointMake(obj.contentOffset.x, offset + top - obj.contentInset.top);
                 }
             }];
             self->_flags.ignoreOffsetChangeObserve = NO;
@@ -605,7 +605,7 @@ static void *observerContext = &observerContext;
 
 - (void)_detachHeaderView
 {
-    if (self.headerViewEmbeded) {
+    if (_headerViewEmbeded) {
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
                                             toView:self];
         self.headerView.frame = rect;
@@ -615,7 +615,7 @@ static void *observerContext = &observerContext;
 
 - (void)_attachHeaderView
 {
-    if (self.headerViewEmbeded) {
+    if (_headerViewEmbeded) {
         UIScrollView *contentView = self.contentColumns[self.selectedColumn];
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
                                             toView:contentView];
