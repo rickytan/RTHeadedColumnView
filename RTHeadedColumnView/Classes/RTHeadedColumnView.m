@@ -273,7 +273,8 @@ static void *observerContext = &observerContext;
         
         [self _updateScrollsToTop];
         
-        self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
+        [self.contentColumns[self.selectedColumn] willChangeValueForKey:NSStringFromSelector(@selector(contentOffset))];
+        [self.contentColumns[self.selectedColumn] didChangeValueForKey:NSStringFromSelector(@selector(contentOffset))];
     }
 }
 
