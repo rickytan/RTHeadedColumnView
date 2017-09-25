@@ -40,20 +40,20 @@
 		09243D430D8A340BDAD863FA8F3CE9DA /* Pods-RTHeadedColumnView_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-RTHeadedColumnView_Example-frameworks.sh"; sourceTree = "<group>"; };
 		127ECC85788AC02921D557865DFCDA11 /* Pods-RTHeadedColumnView_Example-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-RTHeadedColumnView_Example-resources.sh"; sourceTree = "<group>"; };
 		1557EB31432BDDC7309E1C6ACF5CCF60 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-dummy.m"; sourceTree = "<group>"; };
-		1DBE30164730169AF4B7060451134123 /* libRTHeadedColumnView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libRTHeadedColumnView.a; path = libRTHeadedColumnView.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DBE30164730169AF4B7060451134123 /* libRTHeadedColumnView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRTHeadedColumnView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		23D3B14C69DEE018519A890CBC9AFB21 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-frameworks.sh"; sourceTree = "<group>"; };
 		314BAC8B85C23DA6824B0EF76220B7AA /* RTHeadedColumnView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = RTHeadedColumnView.h; sourceTree = "<group>"; };
 		3BE407CF198B26561BB72BEB325B03B8 /* Pods-RTHeadedColumnView_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-RTHeadedColumnView_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		3E877E30F80FDA9C4B79C51B407AA27D /* libPods-RTHeadedColumnView_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-RTHeadedColumnView_Example.a"; path = "libPods-RTHeadedColumnView_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E877E30F80FDA9C4B79C51B407AA27D /* libPods-RTHeadedColumnView_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RTHeadedColumnView_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		45251AE0517C8B4321213D24388E66BE /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		5726B4BCF6A94BE0FB9147E0E4F31030 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-acknowledgements.plist"; sourceTree = "<group>"; };
 		616BEB51ECCAD129BDBCB7A956B56CC6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		674E519F9E5B4F025190F3E1BFAE0956 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-resources.sh"; sourceTree = "<group>"; };
 		6A0DE3CD8DDF698B02C4AE8BC841F092 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		7B3DCD1577A4CF74BE5083EB075432EB /* RTHeadedColumnView-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "RTHeadedColumnView-dummy.m"; sourceTree = "<group>"; };
-		7D884B60F58E644C2ADC92B2654EED0C /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a"; path = "libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D884B60F58E644C2ADC92B2654EED0C /* libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EC994CDC2D681BA26389F78A7E4B325 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		965A9811BF8114CB3E834E8F95500858 /* Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-RTHeadedColumnView_Example-RTHeadedColumnView_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		B59C80B511863B0A797D029FD67D2086 /* Pods-RTHeadedColumnView_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-RTHeadedColumnView_Example-dummy.m"; sourceTree = "<group>"; };
 		C7568EB1D5C8DD5BE1F0EE6CA6DE1728 /* Pods-RTHeadedColumnView_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-RTHeadedColumnView_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -97,7 +97,6 @@
 			children = (
 				C0187AC75D0C9960E4A3E4878D1A89E6 /* Classes */,
 			);
-			name = RTHeadedColumnView;
 			path = RTHeadedColumnView;
 			sourceTree = "<group>";
 		};
@@ -204,7 +203,6 @@
 				314BAC8B85C23DA6824B0EF76220B7AA /* RTHeadedColumnView.h */,
 				EF72968A48EBE3D5B169311A18ED67AD /* RTHeadedColumnView.m */,
 			);
-			name = Classes;
 			path = Classes;
 			sourceTree = "<group>";
 		};
@@ -289,7 +287,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0900;
 			};
 			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -363,20 +361,30 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"POD_CONFIGURATION_DEBUG=1",
@@ -430,19 +438,29 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"POD_CONFIGURATION_RELEASE=1",
 					"$(inherited)",
@@ -472,7 +490,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "Target Support Files/RTHeadedColumnView/RTHeadedColumnView-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
@@ -541,7 +559,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "Target Support Files/RTHeadedColumnView/RTHeadedColumnView-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
