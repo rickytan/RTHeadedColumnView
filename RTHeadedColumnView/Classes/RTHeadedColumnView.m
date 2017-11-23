@@ -167,14 +167,6 @@ static void *observerContext = &observerContext;
             else {
                 self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
-            
-            self->_flags.ignoreOffsetChangeObserve = YES;
-            [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-                if (obj != object) {
-                    obj.contentOffset = CGPointMake(obj.contentOffset.x, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
-                }
-            }];
-            self->_flags.ignoreOffsetChangeObserve = NO;
         }
         else {
             if (self.headerView.superview != self) {
@@ -193,14 +185,6 @@ static void *observerContext = &observerContext;
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
                 }
             }
-            
-            self->_flags.ignoreOffsetChangeObserve = YES;
-            [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-                if (obj != object) {
-                    obj.contentOffset = CGPointMake(obj.contentOffset.x, offset + top - obj.contentInset.top);
-                }
-            }];
-            self->_flags.ignoreOffsetChangeObserve = NO;
         }
         //        [self.headerView.superview bringSubviewToFront:self.headerView];
     }
@@ -261,8 +245,10 @@ static void *observerContext = &observerContext;
                  animated:(BOOL)animated
 {
     if (_selectedColumn != selectedColumn) {
-        _selectedColumn = selectedColumn;
         [self _detachHeaderView];
+        [self _syncContentOffset];
+        
+        _selectedColumn = selectedColumn;
         
         if (animated) {
             self->_flags.ignoreLayoutSetContentOffset = YES;
@@ -623,6 +609,28 @@ static void *observerContext = &observerContext;
     }];
 }
 
+- (void)_syncContentOffset
+{
+    if (self.currentOffset > self.headerViewHeight - self.headerPinHeight) {
+        self->_flags.ignoreOffsetChangeObserve = YES;
+        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+            if (idx != self.selectedColumn) {
+                obj.contentOffset = CGPointMake(obj.contentOffset.x, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
+            }
+        }];
+        self->_flags.ignoreOffsetChangeObserve = NO;
+    }
+    else {
+        self->_flags.ignoreOffsetChangeObserve = YES;
+        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+            if (idx != self.selectedColumn) {
+                obj.contentOffset = CGPointMake(obj.contentOffset.x, self.currentOffset - obj.contentInset.top);
+            }
+        }];
+        self->_flags.ignoreOffsetChangeObserve = NO;
+    }
+}
+
 - (void)_detachHeaderView
 {
     if (_headerViewEmbeded) {
@@ -673,6 +681,8 @@ static void *observerContext = &observerContext;
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
     [self _detachHeaderView];
+    
+    [self _syncContentOffset];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
