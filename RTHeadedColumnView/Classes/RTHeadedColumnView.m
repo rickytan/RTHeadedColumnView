@@ -219,9 +219,7 @@ static void *observerContext = &observerContext;
         _scrollView.bounces = NO;
 #if __IPHONE_11_0 && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
         if (@available(iOS 11.0, *)) {
-            if ([_scrollView respondsToSelector:@selector(setContentInsetAdjustmentBehavior:)]) {
-                _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-            }
+            _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         } else {
             // Fallback on earlier versions
         }
@@ -339,14 +337,18 @@ static void *observerContext = &observerContext;
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
+                    self->_flags.ignoreOffsetChangeObserve = YES;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
+                    self->_flags.ignoreOffsetChangeObserve = NO;
                     
                     tableView.rt_originalTableHeaderView = tableHeader;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableHeader];
                 }
                 else {
+                    self->_flags.ignoreOffsetChangeObserve = YES;
                     tableView.tableHeaderView = nil;
+                    self->_flags.ignoreOffsetChangeObserve = NO;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
@@ -388,14 +390,18 @@ static void *observerContext = &observerContext;
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
+                    self->_flags.ignoreOffsetChangeObserve = YES;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
+                    self->_flags.ignoreOffsetChangeObserve = NO;
                     
                     tableView.rt_originalTableHeaderView = tableHeader;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableHeader];
                 }
                 else {
+                    self->_flags.ignoreOffsetChangeObserve = YES;
                     tableView.tableHeaderView = nil;
+                    self->_flags.ignoreOffsetChangeObserve = NO;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
@@ -705,3 +711,4 @@ static void *observerContext = &observerContext;
 }
 
 @end
+
