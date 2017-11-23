@@ -91,6 +91,7 @@
 
     self.columnView = [[RTHeadedColumnView alloc] initWithFrame:self.view.bounds];
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.columnView.headerViewEmbeded = YES;
     [self.view addSubview:self.columnView];
 
     self.columnView.headerView = headerView;

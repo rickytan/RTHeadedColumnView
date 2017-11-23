@@ -218,14 +218,15 @@ static void *observerContext = &observerContext;
     if (headerView) {
         [_headerView removeFromSuperview];
         _headerView = headerView;
-        //        _headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+        _headerViewHeight = headerView.bounds.size.height;
+
         if (self.headerViewEmbeded) {
             [self.contentColumns[self.selectedColumn] addSubview:_headerView];
         }
         else {
             [self addSubview:_headerView];
         }
-        self.headerViewHeight = headerView.bounds.size.height;
+        self.headerPinHeight = _headerPinHeight;
     }
     else {
         [_headerView removeFromSuperview];
