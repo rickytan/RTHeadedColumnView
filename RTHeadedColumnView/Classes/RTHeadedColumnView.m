@@ -171,7 +171,12 @@ static void *observerContext = &observerContext;
         else {
             if (self.headerView.superview != self) {
                 if (self.headerViewBounce) {
-                    self.headerView.frame = CGRectMake(0, -(self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top), self.bounds.size.width, self.headerViewHeight);
+                    if ([object isKindOfClass:[UITableView class]]) {
+                        self.headerView.frame = CGRectMake(0, -(self.headerPinHeight + ((UIScrollView *)object).rt_originalContentInset.top), self.bounds.size.width, self.headerViewHeight);
+                    }
+                    else {
+                        self.headerView.frame = CGRectMake(0, -(self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top), self.bounds.size.width, self.headerViewHeight);
+                    }
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(-top, offset), self.bounds.size.width, self.headerViewHeight);
@@ -180,7 +185,12 @@ static void *observerContext = &observerContext;
             else {
                 if (self.headerViewBounce) {
                     if (self.headerViewEmbeded) {
-                        self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - (self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top)), self.bounds.size.width, self.headerViewHeight);
+                        if ([object isKindOfClass:[UITableView class]]) {
+                            self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - (self.headerPinHeight + ((UIScrollView *)object).rt_originalContentInset.top)), self.bounds.size.width, self.headerViewHeight);
+                        }
+                        else {
+                            self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - (self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top)), self.bounds.size.width, self.headerViewHeight);
+                        }
                     }
                     else {
                         self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
