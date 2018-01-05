@@ -171,7 +171,7 @@ static void *observerContext = &observerContext;
         else {
             if (self.headerView.superview != self) {
                 if (self.headerViewBounce) {
-                    self.headerView.frame = CGRectMake(0, -top, self.bounds.size.width, self.headerViewHeight);
+                    self.headerView.frame = CGRectMake(0, -(self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top), self.bounds.size.width, self.headerViewHeight);
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(-top, offset), self.bounds.size.width, self.headerViewHeight);
@@ -179,7 +179,12 @@ static void *observerContext = &observerContext;
             }
             else {
                 if (self.headerViewBounce) {
-                    self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
+                    if (self.headerViewEmbeded) {
+                        self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - (self.headerViewHeight + ((UIScrollView *)object).rt_originalContentInset.top)), self.bounds.size.width, self.headerViewHeight);
+                    }
+                    else {
+                        self.headerView.frame = CGRectMake(0, MIN(self.headerViewHeight, - offset - top), self.bounds.size.width, self.headerViewHeight);
+                    }
                 }
                 else {
                     self.headerView.frame = CGRectMake(0, MIN(0, - offset - top), self.bounds.size.width, self.headerViewHeight);
@@ -219,7 +224,7 @@ static void *observerContext = &observerContext;
         [_headerView removeFromSuperview];
         _headerView = headerView;
         _headerViewHeight = headerView.bounds.size.height;
-
+        
         if (self.headerViewEmbeded) {
             [self.contentColumns[self.selectedColumn] addSubview:_headerView];
         }
@@ -545,6 +550,7 @@ static void *observerContext = &observerContext;
                      context:observerContext];
         }];
         
+        [self _notifySelectionChanged];
         [self _attachHeaderView];
         [self setNeedsLayout];
     }
@@ -645,7 +651,7 @@ static void *observerContext = &observerContext;
 - (void)_attachHeaderView
 {
     if (_headerViewEmbeded) {
-        UIScrollView *contentView = self.contentColumns[self.selectedColumn];
+        UIScrollView *contentView = _contentColumns[self.selectedColumn];
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
                                             toView:contentView];
         self.headerView.frame = rect;
@@ -667,7 +673,8 @@ static void *observerContext = &observerContext;
             [self.delegate columnView:self didDisplayColumn:_selectedColumn];
         }
         
-        self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
+        [self.contentColumns[self.selectedColumn] willChangeValueForKey:NSStringFromSelector(@selector(contentOffset))];
+        [self.contentColumns[self.selectedColumn] didChangeValueForKey:NSStringFromSelector(@selector(contentOffset))];
     }
 }
 
