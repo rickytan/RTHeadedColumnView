@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RTHeadedColumnView'
-  s.version          = '0.1.7'
+  s.version          = '0.1.8'
   s.summary          = 'A common headed column view.'
   s.description      = <<-DESC
                        The control is like Android's ViewPager, which has many columns of content to display and share a common header.

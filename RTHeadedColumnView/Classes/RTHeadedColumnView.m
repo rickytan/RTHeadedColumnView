@@ -628,7 +628,7 @@ static void *observerContext = &observerContext;
 
 - (void)_syncContentOffset
 {
-    if (self.currentOffset > self.headerViewHeight - self.headerPinHeight) {
+    if (self.currentOffset >= self.headerViewHeight - self.headerPinHeight) {
         self->_flags.ignoreOffsetChangeObserve = YES;
         [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
             if (idx != self.selectedColumn) {
