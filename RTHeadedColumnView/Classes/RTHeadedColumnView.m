@@ -560,9 +560,11 @@ static void *observerContext = &observerContext;
                      context:observerContext];
         }];
         
+        [self setNeedsLayout];
+        [self layoutIfNeeded];  // _notifySelectionChanged depends on contentSize, so layout first!
+        
         [self _notifySelectionChanged];
         [self _attachHeaderView];
-        [self setNeedsLayout];
     }
 }
 
