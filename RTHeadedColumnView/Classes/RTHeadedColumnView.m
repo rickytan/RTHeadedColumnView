@@ -271,7 +271,7 @@ static void *observerContext = &observerContext;
         }
         [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * _selectedColumn, 0)
                                  animated:animated];
-        if (!animated) {
+        if (!animated && !self.scrollView.isDragging) {
             [self _attachHeaderView];
         }
         
