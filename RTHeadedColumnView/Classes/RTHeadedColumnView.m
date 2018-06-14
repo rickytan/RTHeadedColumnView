@@ -550,7 +550,7 @@ static void *observerContext = &observerContext;
             }
             
             obj.frame = CGRectMake(width * idx, 0, width, height);
-            obj.scrollsToTop = idx == _selectedColumn;
+            obj.scrollsToTop = idx == self->_selectedColumn;
             [self.scrollView addSubview:obj];
             
             
@@ -596,7 +596,7 @@ static void *observerContext = &observerContext;
         _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
     }
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-        CGRect rect = CGRectMake(width * idx, 0, width, _scrollView.bounds.size.height);
+        CGRect rect = CGRectMake(width * idx, 0, width, self->_scrollView.bounds.size.height);
         if (!CGRectEqualToRect(obj.frame, rect)) {
             obj.frame = rect;
         }
@@ -624,7 +624,7 @@ static void *observerContext = &observerContext;
 - (void)_updateScrollsToTop
 {
     [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-        obj.scrollsToTop = idx == _selectedColumn;
+        obj.scrollsToTop = idx == self->_selectedColumn;
     }];
 }
 
