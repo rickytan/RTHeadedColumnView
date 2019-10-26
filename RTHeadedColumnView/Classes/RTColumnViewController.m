@@ -25,6 +25,11 @@
     return self;
 }
 
+- (void)dealloc
+{
+    self.columnView.contentColumns = nil;
+}
+
 - (void)loadView
 {
     [super loadView];
