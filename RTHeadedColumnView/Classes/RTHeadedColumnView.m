@@ -733,8 +733,11 @@ static void *observerContext = &observerContext;
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
-    self->_flags.ignoreLayoutSetContentOffset = NO;
-    [self _attachHeaderView];
+    if (self->_flags.ignoreLayoutSetContentOffset) {
+        self->_flags.ignoreLayoutSetContentOffset = NO;
+    } else {
+        [self _attachHeaderView];
+    }
     self.currentOffset = self.contentColumns[self.selectedColumn].contentScrollView.contentInset.top + self.contentColumns[self.selectedColumn].contentScrollView.contentOffset.y;
 }
 
