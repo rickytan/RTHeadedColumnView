@@ -266,13 +266,15 @@ static void *observerContext = &observerContext;
         [self _detachHeaderView];
         [self _syncContentOffset];
         
-        _selectedColumn = selectedColumn;
         
         if (animated) {
             self->_flags.ignoreLayoutSetContentOffset = YES;
         }
-        [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * _selectedColumn, 0)
+        [self.scrollView setContentOffset:CGPointMake(CGRectGetWidth(self.bounds) * selectedColumn, 0)
                                  animated:animated];
+
+        _selectedColumn = selectedColumn;
+        
         if (!animated && !self.scrollView.isDragging) {
             [self _attachHeaderView];
         }

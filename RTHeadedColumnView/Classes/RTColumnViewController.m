@@ -130,7 +130,7 @@
 
 - (void)setCurrentIndex:(NSInteger)currentIndex
 {
-    self.columnView.selectedColumn = currentIndex;
+    [self setCurrentIndex:currentIndex animated:NO];
 }
 
 - (NSInteger)currentIndex
@@ -138,10 +138,38 @@
     return self.columnView.selectedColumn;
 }
 
+- (void)setCurrentIndex:(NSInteger)currentIndex animated:(BOOL)animated
+{
+    if (self.currentIndex == currentIndex) {
+        return;
+    }
+    
+    NSInteger oldIndex = self.currentIndex;
+    NSInteger newIndex = currentIndex;
+    
+    [self.viewControllers[oldIndex] beginAppearanceTransition:NO animated:animated];
+    [self.viewControllers[newIndex] beginAppearanceTransition:YES animated:animated];
+    
+    [self.columnView setSelectedColumn:currentIndex animated:animated];
+    
+    if (!animated) {
+        [self.viewControllers[oldIndex] endAppearanceTransition];
+        [self.viewControllers[newIndex] endAppearanceTransition];
+    }
+    else {
+        _willAppearIndex = newIndex;
+        _willDisappearIndex = oldIndex;
+    }
+}
+
 - (void)setWillAppearIndex:(NSInteger)willAppearIndex
 {
     if (_willAppearIndex != willAppearIndex) {
         if (_willAppearIndex >= 0) {
+            if ((willAppearIndex < _willDisappearIndex && _willAppearIndex > _willDisappearIndex) ||
+                (willAppearIndex > _willDisappearIndex && _willAppearIndex < _willDisappearIndex)) {
+                [self.viewControllers[_willAppearIndex] beginAppearanceTransition:NO animated:NO];
+            }
             [self.viewControllers[_willAppearIndex] endAppearanceTransition];
         }
         
@@ -197,18 +225,21 @@
     }
     
     _willAppearIndex = _willDisappearIndex = -1;
+    
+    [self contentDidDisplayColumn:columnIndex];
 }
 
 - (void)columnView:(RTHeadedColumnView *)columnView didScrollToOffset:(UIOffset)offset
 {
     const CGFloat width = columnView.scrollView.bounds.size.width;
     const CGFloat currentOffset = width * self.currentIndex;
+    const BOOL isDragging = columnView.scrollView.isDragging;
     
     CGFloat rem = remainder(offset.horizontal, width);
     if (rem == 0) {
         NSInteger newCurrentIndex = (NSInteger)floor(offset.horizontal / width);
         // 滚动一下，然后松手回到原位置
-        if (newCurrentIndex == self.currentIndex) {
+        if (isDragging && newCurrentIndex == self.currentIndex) {
             if (_willAppearIndex >= 0) {
                 [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
             }
@@ -225,19 +256,36 @@
             
             _willAppearIndex = _willDisappearIndex = -1;
         }
+        else if (!isDragging && newCurrentIndex != self.currentIndex) {
+            
+//            [self.viewControllers[self.currentIndex] endAppearanceTransition];
+//            [self.viewControllers[newCurrentIndex] endAppearanceTransition];
+        }
+        else if (!isDragging) {
+            if (_willAppearIndex >= 0) {
+                [self.viewControllers[self.willAppearIndex] endAppearanceTransition];
+            }
+            if (_willDisappearIndex >= 0) {
+                [self.viewControllers[self.willDisappearIndex] endAppearanceTransition];
+            }
+            
+            _willAppearIndex = _willDisappearIndex = -1;
+        }
         // else 不处理，会走 didDisplayColumn 的逻辑
         else {
             
         }
     }
-    else if (offset.horizontal > currentOffset) {
+    else if (isDragging && offset.horizontal > currentOffset) {
         self.willAppearIndex = (NSInteger)ceil(offset.horizontal / width);
         self.willDisappearIndex = (NSInteger)floor(offset.horizontal / width);
     }
-    else if (offset.horizontal < currentOffset) {
+    else if (isDragging && offset.horizontal < currentOffset) {
         self.willAppearIndex = (NSInteger)floor(offset.horizontal / width);
         self.willDisappearIndex = (NSInteger)ceil(offset.horizontal / width);
     }
+    
+    [self contentDidScrollToOffset:offset];
 }
 
 @end
