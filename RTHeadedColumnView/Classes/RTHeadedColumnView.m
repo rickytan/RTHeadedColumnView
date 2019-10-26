@@ -110,8 +110,8 @@ static void *observerContext = &observerContext;
 - (void)dealloc
 {
     _scrollView.delegate = nil;
-    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-        [obj removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
+    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj.contentScrollView removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
     }];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
@@ -597,7 +597,7 @@ static void *observerContext = &observerContext;
             _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
         }
     }
-    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+    [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         CGRect rect = CGRectMake(width * idx, 0, width, self->_scrollView.bounds.size.height);
         if (!CGRectEqualToRect(obj.frame, rect)) {
             obj.frame = rect;
