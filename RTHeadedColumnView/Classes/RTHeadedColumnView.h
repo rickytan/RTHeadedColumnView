@@ -26,6 +26,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol RTScrollableContent <NSObject>
+
+@required
+- (__kindof UIScrollView *)contentScrollView;
+
+@end
+
 @protocol RTHeadedColumnViewDelegate <NSObject>
 @optional
 - (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex;
@@ -83,10 +90,15 @@ IB_DESIGNABLE
  @note       This property will always return a non-nil value, even after set it to nil, because there is at least
              one scrollview in the array
  */
-@property (nonatomic, strong, null_resettable) IBOutletCollection(UIScrollView) NSArray <__kindof UIScrollView *> *contentColumns;
+@property (nonatomic, strong, null_resettable) IBOutletCollection(__kindof UIView <RTScrollableContent>) NSArray <__kindof UIView <RTScrollableContent> *> *contentColumns;
 
 @property (nonatomic, assign) NSInteger selectedColumn;
 - (void)setSelectedColumn:(NSInteger)selectedColumn animated:(BOOL)animated;
+
+@end
+
+
+@interface UIScrollView (RTScrollableContent) <RTScrollableContent>
 
 @end
 

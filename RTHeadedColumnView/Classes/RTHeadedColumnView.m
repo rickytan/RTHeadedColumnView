@@ -153,7 +153,7 @@ static void *observerContext = &observerContext;
                        context:(void *)context
 {
     if (context == observerContext && !self->_flags.ignoreOffsetChangeObserve) {
-        if (self.contentColumns[self.selectedColumn] != object) {
+        if (self.contentColumns[self.selectedColumn].contentScrollView != object) {
             return;
         }
         CGFloat top = ((UIScrollView *)object).contentInset.top;
@@ -236,7 +236,7 @@ static void *observerContext = &observerContext;
         _headerViewHeight = headerView.bounds.size.height;
         
         if (self.headerViewEmbeded) {
-            [self.contentColumns[self.selectedColumn] addSubview:_headerView];
+            [self.contentColumns[self.selectedColumn].contentScrollView addSubview:_headerView];
         }
         else {
             [self addSubview:_headerView];
@@ -289,7 +289,7 @@ static void *observerContext = &observerContext;
         
         if (self.headerView) {
             if (_headerViewEmbeded) {
-                [self.contentColumns[self.selectedColumn] addSubview:self.headerView];
+                [self.contentColumns[self.selectedColumn].contentScrollView addSubview:self.headerView];
             }
             else {
                 [self addSubview:_headerView];
@@ -333,9 +333,9 @@ static void *observerContext = &observerContext;
 {
     _headerPinHeight = headerPinHeight;
     
-    [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+    [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (self.headerViewEmbeded) {
-            if ([obj isKindOfClass:[UITableView class]]) {
+            if ([obj.contentScrollView isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
@@ -355,40 +355,40 @@ static void *observerContext = &observerContext;
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
                 
-                UIEdgeInsets inset = obj.contentInset;
+                UIEdgeInsets inset = obj.contentScrollView.contentInset;
                 CGFloat delta = inset.top - self.headerPinHeight;
-                inset.top = self.headerPinHeight + obj.rt_originalContentInset.top;
+                inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
                 
-                CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerPinHeight) - obj.rt_originalContentInset.top;
+                CGPoint offset = obj.contentScrollView.contentOffset;
+                offset.y = MAX(offset.y + delta, - self.headerPinHeight) - obj.contentScrollView.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
-                obj.contentOffset = offset;
+                obj.contentScrollView.contentOffset = offset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
-                obj.contentInset = inset;
+                obj.contentScrollView.contentInset = inset;
             }
             else {
-                UIEdgeInsets inset = obj.contentInset;
+                UIEdgeInsets inset = obj.contentScrollView.contentInset;
                 CGFloat delta = inset.top - self.headerViewHeight;
-                inset.top = self.headerViewHeight + obj.rt_originalContentInset.top;
+                inset.top = self.headerViewHeight + obj.contentScrollView.rt_originalContentInset.top;
                 
-                CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerViewHeight) - obj.rt_originalContentInset.top;
+                CGPoint offset = obj.contentScrollView.contentOffset;
+                offset.y = MAX(offset.y + delta, - self.headerViewHeight) - obj.contentScrollView.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
-                obj.contentOffset = offset;
+                obj.contentScrollView.contentOffset = offset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
-                obj.contentInset = inset;
+                obj.contentScrollView.contentInset = inset;
             }
             
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
-                obj.scrollIndicatorInsets = UIEdgeInsetsZero;
+                obj.contentScrollView.scrollIndicatorInsets = UIEdgeInsetsZero;
             }
         }
         else {
-            if ([obj isKindOfClass:[UITableView class]]) {
+            if ([obj.contentScrollView isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
@@ -408,38 +408,38 @@ static void *observerContext = &observerContext;
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
                 
-                UIEdgeInsets inset = obj.contentInset;
+                UIEdgeInsets inset = obj.contentScrollView.contentInset;
                 CGFloat delta = inset.top;
-                inset.top = obj.rt_originalContentInset.top;
+                inset.top = obj.contentScrollView.rt_originalContentInset.top;
                 
-                CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, 0) - obj.rt_originalContentInset.top;
+                CGPoint offset = obj.contentScrollView.contentOffset;
+                offset.y = MAX(offset.y + delta, 0) - obj.contentScrollView.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
-                obj.contentOffset = offset;
+                obj.contentScrollView.contentOffset = offset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
-                obj.contentInset = inset;
+                obj.contentScrollView.contentInset = inset;
             }
             else {
-                UIEdgeInsets inset = obj.contentInset;
+                UIEdgeInsets inset = obj.contentScrollView.contentInset;
                 CGFloat delta = inset.top - (self.headerViewHeight - self.headerPinHeight);
-                inset.top = self.headerViewHeight - self.headerPinHeight + obj.rt_originalContentInset.top;
+                inset.top = self.headerViewHeight - self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
                 
-                CGPoint offset = obj.contentOffset;
-                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight)) - obj.rt_originalContentInset.top;
+                CGPoint offset = obj.contentScrollView.contentOffset;
+                offset.y = MAX(offset.y + delta, - (self.headerViewHeight - self.headerPinHeight)) - obj.contentScrollView.rt_originalContentInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
-                obj.contentOffset = offset;
+                obj.contentScrollView.contentOffset = offset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
-                obj.contentInset = inset;
+                obj.contentScrollView.contentInset = inset;
             }
             
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
-                UIEdgeInsets inset = obj.scrollIndicatorInsets;
+                UIEdgeInsets inset = obj.contentScrollView.scrollIndicatorInsets;
                 inset.top = self.headerViewHeight - self.headerPinHeight;
-                obj.scrollIndicatorInsets = inset;
+                obj.contentScrollView.scrollIndicatorInsets = inset;
             }
         }
     }];
@@ -465,17 +465,17 @@ static void *observerContext = &observerContext;
     }
 }
 
-- (void)setContentColumns:(NSArray<__kindof UIScrollView *> *)contentColumns
+- (void)setContentColumns:(NSArray<__kindof UIView<RTScrollableContent> *> *)contentColumns
 {
     if (![_contentColumns isEqualToArray:contentColumns]) {
         [self _detachHeaderView];
         
-        [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+        [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [obj removeFromSuperview];
-            [obj removeObserver:self
-                     forKeyPath:NSStringFromSelector(@selector(contentOffset))
-                        context:observerContext];
-            obj.contentInset = obj.rt_originalContentInset;
+            [obj.contentScrollView removeObserver:self
+                                       forKeyPath:NSStringFromSelector(@selector(contentOffset))
+                                          context:observerContext];
+            obj.contentScrollView.contentInset = obj.contentScrollView.rt_originalContentInset;
         }];
         
         _contentColumns = contentColumns;
@@ -491,8 +491,8 @@ static void *observerContext = &observerContext;
         CGFloat width = self.scrollView.bounds.size.width;
         CGFloat height = self.scrollView.bounds.size.height;
         
-        [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-            obj.rt_originalContentInset = obj.contentInset;
+        [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            obj.contentScrollView.rt_originalContentInset = obj.contentScrollView.contentInset;
             
             if ([obj isKindOfClass:[UITableView class]]) {
                 UITableView *tableView = (UITableView *)obj;
@@ -511,53 +511,53 @@ static void *observerContext = &observerContext;
                 }
                 
                 if (self.headerViewEmbeded) {
-                    UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerPinHeight + obj.rt_originalContentInset.top;
-                    obj.contentInset = inset;
-                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
+                    UIEdgeInsets inset = obj.contentScrollView.contentInset;
+                    inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
+                    obj.contentScrollView.contentInset = inset;
+                    obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
-                    UIEdgeInsets inset = obj.contentInset;
-                    inset.top = obj.rt_originalContentInset.top;
-                    obj.contentInset = inset;
-                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
+                    UIEdgeInsets inset = obj.contentScrollView.contentInset;
+                    inset.top = obj.contentScrollView.rt_originalContentInset.top;
+                    obj.contentScrollView.contentInset = inset;
+                    obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
             }
             else {
                 if (self.headerViewEmbeded) {
-                    UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerViewHeight + obj.rt_originalContentInset.top;
-                    obj.contentInset = inset;
-                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
+                    UIEdgeInsets inset = obj.contentScrollView.contentInset;
+                    inset.top = self.headerViewHeight + obj.contentScrollView.rt_originalContentInset.top;
+                    obj.contentScrollView.contentInset = inset;
+                    obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
-                    UIEdgeInsets inset = obj.contentInset;
-                    inset.top = self.headerViewHeight - self.headerPinHeight + obj.rt_originalContentInset.top;
-                    obj.contentInset = inset;
-                    obj.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
+                    UIEdgeInsets inset = obj.contentScrollView.contentInset;
+                    inset.top = self.headerViewHeight - self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
+                    obj.contentScrollView.contentInset = inset;
+                    obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
             }
             
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
                 if (self.headerViewEmbeded) {
-                    obj.scrollIndicatorInsets = UIEdgeInsetsZero;
+                    obj.contentScrollView.scrollIndicatorInsets = UIEdgeInsetsZero;
                 }
                 else {
-                    UIEdgeInsets inset = obj.scrollIndicatorInsets;
+                    UIEdgeInsets inset = obj.contentScrollView.scrollIndicatorInsets;
                     inset.top = self.headerViewHeight - self.headerPinHeight;
-                    obj.scrollIndicatorInsets = inset;
+                    obj.contentScrollView.scrollIndicatorInsets = inset;
                 }
             }
             
             obj.frame = CGRectMake(width * idx, 0, width, height);
-            obj.scrollsToTop = idx == self->_selectedColumn;
+            obj.contentScrollView.scrollsToTop = idx == self->_selectedColumn;
             [self.scrollView addSubview:obj];
             
             
-            [obj addObserver:self
-                  forKeyPath:NSStringFromSelector(@selector(contentOffset))
-                     options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                     context:observerContext];
+            [obj.contentScrollView addObserver:self
+                                    forKeyPath:NSStringFromSelector(@selector(contentOffset))
+                                       options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                       context:observerContext];
         }];
         
         [self setNeedsLayout];
@@ -568,7 +568,7 @@ static void *observerContext = &observerContext;
     }
 }
 
-- (NSArray<UIScrollView *> *)contentColumns
+- (NSArray<UIView<RTScrollableContent> *> *)contentColumns
 {
     if (_contentColumns.count == 0) {
         self.contentColumns = @[[[UIScrollView alloc] init]];
@@ -593,7 +593,9 @@ static void *observerContext = &observerContext;
     
     _scrollView.contentSize = CGSizeMake(width * _contentColumns.count, 0);
     if (!self->_flags.ignoreLayoutSetContentOffset) {
-        _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
+        if (self.selectedColumn != NSNotFound) {
+            _scrollView.contentOffset = CGPointMake(width * self.selectedColumn, 0);
+        }
     }
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
         CGRect rect = CGRectMake(width * idx, 0, width, self->_scrollView.bounds.size.height);
@@ -623,8 +625,8 @@ static void *observerContext = &observerContext;
 
 - (void)_updateScrollsToTop
 {
-    [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
-        obj.scrollsToTop = idx == self->_selectedColumn;
+    [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.contentScrollView.scrollsToTop = idx == self->_selectedColumn;
     }];
 }
 
@@ -632,18 +634,18 @@ static void *observerContext = &observerContext;
 {
     if (self.currentOffset >= self.headerViewHeight - self.headerPinHeight) {
         self->_flags.ignoreOffsetChangeObserve = YES;
-        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if (idx != self.selectedColumn) {
-                obj.contentOffset = CGPointMake(obj.contentOffset.x, MAX(obj.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentInset.top));
+                obj.contentScrollView.contentOffset = CGPointMake(obj.contentScrollView.contentOffset.x, MAX(obj.contentScrollView.contentOffset.y, self.headerViewHeight - self.headerPinHeight - obj.contentScrollView.contentInset.top));
             }
         }];
         self->_flags.ignoreOffsetChangeObserve = NO;
     }
     else {
         self->_flags.ignoreOffsetChangeObserve = YES;
-        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIScrollView * obj, NSUInteger idx, BOOL * stop) {
+        [self.contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if (idx != self.selectedColumn) {
-                obj.contentOffset = CGPointMake(obj.contentOffset.x, self.currentOffset - obj.contentInset.top);
+                obj.contentScrollView.contentOffset = CGPointMake(obj.contentScrollView.contentOffset.x, self.currentOffset - obj.contentScrollView.contentInset.top);
             }
         }];
         self->_flags.ignoreOffsetChangeObserve = NO;
@@ -663,11 +665,11 @@ static void *observerContext = &observerContext;
 - (void)_attachHeaderView
 {
     if (_headerViewEmbeded) {
-        UIScrollView *contentView = _contentColumns[self.selectedColumn];
+        UIView <RTScrollableContent> *contentView = _contentColumns[self.selectedColumn];
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
-                                            toView:contentView];
+                                            toView:contentView.contentScrollView];
         self.headerView.frame = rect;
-        [contentView addSubview:self.headerView];
+        [contentView.contentScrollView addSubview:self.headerView];
         [self.scrollView bringSubviewToFront:contentView];
     }
 }
@@ -693,7 +695,7 @@ static void *observerContext = &observerContext;
 - (void)onWillRotate:(NSNotification *)notification
 {
     [self _attachHeaderView];
-    self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
+    self.currentOffset = self.contentColumns[self.selectedColumn].contentScrollView.contentInset.top + self.contentColumns[self.selectedColumn].contentScrollView.contentOffset.y;
 }
 
 #pragma mark - UIScrollView Delegate
@@ -729,7 +731,7 @@ static void *observerContext = &observerContext;
 {
     self->_flags.ignoreLayoutSetContentOffset = NO;
     [self _attachHeaderView];
-    self.currentOffset = self.contentColumns[self.selectedColumn].contentInset.top + self.contentColumns[self.selectedColumn].contentOffset.y;
+    self.currentOffset = self.contentColumns[self.selectedColumn].contentScrollView.contentInset.top + self.contentColumns[self.selectedColumn].contentScrollView.contentOffset.y;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -742,3 +744,12 @@ static void *observerContext = &observerContext;
 
 @end
 
+
+@implementation UIScrollView (RTScrollableContent)
+
+- (UIScrollView *)contentScrollView
+{
+    return self;
+}
+
+@end
