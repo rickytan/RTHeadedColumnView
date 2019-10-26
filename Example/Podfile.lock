@@ -1,5 +1,5 @@
 PODS:
-  - RTHeadedColumnView (0.1.0)
+  - RTHeadedColumnView (0.1.10)
 
 DEPENDENCIES:
   - RTHeadedColumnView (from `../`)
@@ -9,8 +9,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  RTHeadedColumnView: e5e8d35356deeba98a37858362f1eb349d1a8b8f
+  RTHeadedColumnView: 7c1eba311af14556c19d398d01a175abe5984aa9
 
 PODFILE CHECKSUM: b2a139353f8b703ee6b79a2e6b7cead80da519ce
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.5.3
