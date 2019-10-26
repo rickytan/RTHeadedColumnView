@@ -168,6 +168,16 @@
     }
 }
 
+- (void)contentDidDisplayColumn:(NSInteger)columnIndex
+{
+    
+}
+
+- (void)contentDidScrollToOffset:(UIOffset)offset
+{
+    
+}
+
 #pragma mark - RTHeadedColumnViewDelegate
 
 - (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex
