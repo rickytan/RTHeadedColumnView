@@ -153,8 +153,10 @@ static void *observerContext = &observerContext;
                        context:(void *)context
 {
     if (context == observerContext && !self->_flags.ignoreOffsetChangeObserve) {
-        if (self.contentColumns[self.selectedColumn].contentScrollView != object) {
-            return;
+        if (0 <= _selectedColumn && _selectedColumn < _contentColumns.count) {
+            if (_contentColumns[_selectedColumn].contentScrollView != object) {
+                return;
+            }
         }
         CGFloat top = ((UIScrollView *)object).contentInset.top;
         CGFloat offset = [change[NSKeyValueChangeNewKey] CGPointValue].y;
