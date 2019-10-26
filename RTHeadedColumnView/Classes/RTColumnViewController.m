@@ -147,6 +147,13 @@
     NSInteger oldIndex = self.currentIndex;
     NSInteger newIndex = currentIndex;
     
+    if (_willAppearIndex >= 0 && _willAppearIndex != newIndex) {
+        [self.viewControllers[self.willAppearIndex] endAppearanceTransition];
+    }
+    if (_willDisappearIndex >= 0 && _willDisappearIndex != oldIndex) {
+        [self.viewControllers[self.willDisappearIndex] endAppearanceTransition];
+    }
+    
     [self.viewControllers[oldIndex] beginAppearanceTransition:NO animated:animated];
     [self.viewControllers[newIndex] beginAppearanceTransition:YES animated:animated];
     
