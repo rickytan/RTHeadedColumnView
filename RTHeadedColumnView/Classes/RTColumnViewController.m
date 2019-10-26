@@ -234,12 +234,13 @@
     const CGFloat width = columnView.scrollView.bounds.size.width;
     const CGFloat currentOffset = width * self.currentIndex;
     const BOOL isDragging = columnView.scrollView.isDragging;
+    const BOOL isDecelerating = columnView.scrollView.isDecelerating;
     
     CGFloat rem = remainder(offset.horizontal, width);
     if (rem == 0) {
         NSInteger newCurrentIndex = (NSInteger)floor(offset.horizontal / width);
         // 滚动一下，然后松手回到原位置
-        if (isDragging && newCurrentIndex == self.currentIndex) {
+        if ((isDragging || isDecelerating) && newCurrentIndex == self.currentIndex) {
             if (_willAppearIndex >= 0) {
                 [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
             }
