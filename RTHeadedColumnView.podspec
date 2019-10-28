@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.version          = (require 'martin'; Martin::smart_version)
   s.summary          = 'A common headed column view.'
   s.description      = <<-DESC
-                       The control is like Android's ViewPager, which has many columns of content to display and share a common header.
+                       The control is like Android s ViewPager, which has many columns of content to display and share a common header.
                        DESC
 
   s.homepage         = 'https://g.hz.netease.com/cloudmusic-ios-foundation/RTHeadedColumnView'
