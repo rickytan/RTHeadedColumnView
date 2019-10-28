@@ -8,17 +8,17 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RTHeadedColumnView'
-  s.version          = '0.1.10'
+  s.version          = (require 'martin'; Martin::smart_version)
   s.summary          = 'A common headed column view.'
   s.description      = <<-DESC
                        The control is like Android's ViewPager, which has many columns of content to display and share a common header.
                        DESC
 
-  s.homepage         = 'https://github.com/rickytan/RTHeadedColumnView'
+  s.homepage         = 'https://g.hz.netease.com/cloudmusic-ios-foundation/RTHeadedColumnView'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'rickytan' => 'ricky.tan.xin@gmail.com' }
-  s.source           = { :git => 'https://github.com/rickytan/RTHeadedColumnView.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://g.hz.netease.com/cloudmusic-ios-foundation/RTHeadedColumnView.git', :tag => s.version.to_s }
   s.social_media_url = 'http://rickytan.cn'
 
   s.ios.deployment_target = '6.0'
