@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://g.hz.netease.com/cloudmusic-ios-foundation/RTHeadedColumnView.git', :tag => s.version.to_s }
   s.social_media_url = 'http://rickytan.cn'
 
-  s.ios.deployment_target = '6.0'
+  s.ios.deployment_target = '8.0'
 
   s.source_files = 'RTHeadedColumnView/Classes/**/*'
 
