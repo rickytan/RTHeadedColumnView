@@ -134,12 +134,11 @@
             if (self->_flags._currentVCNeedsAppear) {
                 self->_flags._currentVCNeedsAppear = NO;
                 [self.currentViewController beginAppearanceTransition:YES animated:NO];
+                
+                if (self->_flags._isAppeared) {
+                    [self.currentViewController endAppearanceTransition];
+                }
             }
-            
-            if (self->_flags._isAppeared) {
-                [self.currentViewController endAppearanceTransition];
-            }
-
         });
     }
 }
