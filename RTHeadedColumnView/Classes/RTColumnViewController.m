@@ -9,12 +9,17 @@
 
 @interface RTColumnViewController () <RTHeadedColumnViewDelegate>
 @property (nonatomic, strong) RTHeadedColumnView *columnView;
-
 @property (nonatomic) NSInteger willAppearIndex;
 @property (nonatomic) NSInteger willDisappearIndex;
 @end
 
 @implementation RTColumnViewController
+{
+    struct {
+        BOOL    _currentVCNeedsAppear:1;
+        BOOL    _isAppeared:1;
+    } _flags;
+}
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -56,13 +61,17 @@
 {
     [super viewWillAppear:animated];
     
-    [self.currentViewController beginAppearanceTransition:YES animated:animated];
+    if (self.currentViewController) {
+        [self.currentViewController beginAppearanceTransition:YES animated:animated];
+    } else {
+        _flags._currentVCNeedsAppear = YES;
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
+    _flags._isAppeared = YES;
     [self.currentViewController endAppearanceTransition];
 }
 
@@ -76,7 +85,7 @@
 - (void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
-    
+    _flags._isAppeared = NO;
     [self.currentViewController endAppearanceTransition];
 }
 
@@ -120,12 +129,27 @@
             [arr addObject:obj.view];
         }];
         self.columnView.contentColumns = [arr copy];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self->_flags._currentVCNeedsAppear) {
+                self->_flags._currentVCNeedsAppear = NO;
+                [self.currentViewController beginAppearanceTransition:YES animated:NO];
+            }
+            
+            if (self->_flags._isAppeared) {
+                [self.currentViewController endAppearanceTransition];
+            }
+
+        });
     }
 }
 
 - (UIViewController<RTScrollableContent> *)currentViewController
 {
-    return self.viewControllers[self.currentIndex];
+    if (0 <= self.currentIndex && self.currentIndex < self.viewControllers.count) {
+        return self.viewControllers[self.currentIndex];
+    }
+    return nil;
 }
 
 - (void)setCurrentIndex:(NSInteger)currentIndex
