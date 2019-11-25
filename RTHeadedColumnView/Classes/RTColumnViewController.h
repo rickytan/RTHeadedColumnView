@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSArray <__kindof UIViewController <RTScrollableContent> *> *viewControllers;
 @property (nonatomic, readonly) __kindof UIViewController <RTScrollableContent> *currentViewController;
 
+@property (nonatomic) BOOL autoHideVerticalScrollIndicator;
+
 @property (nonatomic) NSInteger currentIndex;
 - (void)setCurrentIndex:(NSInteger)currentIndex animated:(BOOL)animated;
 

@@ -11,6 +11,8 @@
 @property (nonatomic, strong) RTHeadedColumnView *columnView;
 @property (nonatomic) NSInteger willAppearIndex;
 @property (nonatomic) NSInteger willDisappearIndex;
+
+@property (nonatomic) NSMapTable *showsVerticalScrollIndicatorMapTable;
 @end
 
 @implementation RTColumnViewController
@@ -62,7 +64,7 @@
     [super viewWillAppear:animated];
     
     if (self.currentViewController) {
-        [self.currentViewController beginAppearanceTransition:YES animated:animated];
+        [self nk_beginAppearanceTransition:self.currentViewController isAppearing:YES animated:animated];
     } else {
         _flags._currentVCNeedsAppear = YES;
     }
@@ -79,7 +81,7 @@
 {
     [super viewWillDisappear:animated];
     
-    [self.currentViewController beginAppearanceTransition:NO animated:animated];
+    [self nk_beginAppearanceTransition:self.currentViewController isAppearing:NO animated:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
@@ -116,10 +118,15 @@
         [obj removeFromParentViewController];
     }];
     
+    [_showsVerticalScrollIndicatorMapTable removeAllObjects];
     [_viewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj.parentViewController != self) {
             [self addChildViewController:obj];
             [obj didMoveToParentViewController:self];
+            if (self.autoHideVerticalScrollIndicator && [obj respondsToSelector:@selector(contentScrollViewShowsVerticalScrollIndicator)]) {
+                NSNumber *value = @([obj contentScrollViewShowsVerticalScrollIndicator]);
+                [self.showsVerticalScrollIndicatorMapTable setObject:value forKey:obj];
+            }
         }
     }];
     
@@ -133,7 +140,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self->_flags._currentVCNeedsAppear) {
                 self->_flags._currentVCNeedsAppear = NO;
-                [self.currentViewController beginAppearanceTransition:YES animated:NO];
+                [self nk_beginAppearanceTransition:self.currentViewController isAppearing:YES animated:NO];
                 
                 if (self->_flags._isAppeared) {
                     [self.currentViewController endAppearanceTransition];
@@ -177,8 +184,8 @@
         [self.viewControllers[self.willDisappearIndex] endAppearanceTransition];
     }
     
-    [self.viewControllers[oldIndex] beginAppearanceTransition:NO animated:animated];
-    [self.viewControllers[newIndex] beginAppearanceTransition:YES animated:animated];
+    [self nk_beginAppearanceTransition:self.viewControllers[oldIndex] isAppearing:NO animated:animated];
+    [self nk_beginAppearanceTransition:self.viewControllers[newIndex] isAppearing:YES animated:animated];
     
     [self.columnView setSelectedColumn:currentIndex animated:animated];
     
@@ -198,7 +205,7 @@
         if (_willAppearIndex >= 0) {
             if ((willAppearIndex < _willDisappearIndex && _willAppearIndex > _willDisappearIndex) ||
                 (willAppearIndex > _willDisappearIndex && _willAppearIndex < _willDisappearIndex)) {
-                [self.viewControllers[_willAppearIndex] beginAppearanceTransition:NO animated:NO];
+                [self nk_beginAppearanceTransition:self.viewControllers[_willAppearIndex] isAppearing:NO animated:NO];
             }
             [self.viewControllers[_willAppearIndex] endAppearanceTransition];
         }
@@ -206,7 +213,7 @@
         _willAppearIndex = willAppearIndex;
         
         if (willAppearIndex >= 0) {
-            [self.viewControllers[willAppearIndex] beginAppearanceTransition:YES animated:YES];
+            [self nk_beginAppearanceTransition:self.viewControllers[willAppearIndex] isAppearing:YES animated:YES];
         }
     }
 }
@@ -221,9 +228,32 @@
         _willDisappearIndex = willDisappearIndex;
         
         if (willDisappearIndex >= 0) {
-            [self.viewControllers[willDisappearIndex] beginAppearanceTransition:NO animated:YES];
+            [self nk_beginAppearanceTransition:self.viewControllers[willDisappearIndex] isAppearing:NO animated:YES];
         }
     }
+}
+
+- (void)nk_beginAppearanceTransition:(UIViewController <RTScrollableContent> *)vc isAppearing:(BOOL)isAppearing animated:(BOOL)animated {
+    [vc beginAppearanceTransition:isAppearing animated:animated];
+    [self autoShowHideVerticalScrollIndicatorIfNeeded:vc bShow:isAppearing];
+}
+
+- (void)autoShowHideVerticalScrollIndicatorIfNeeded:(UIViewController <RTScrollableContent> *)vc bShow:(BOOL)bShow {
+    if (!self.autoHideVerticalScrollIndicator) {
+        return;
+    }
+    BOOL showsVerticalScrollIndicator = [[self.showsVerticalScrollIndicatorMapTable objectForKey:vc] boolValue];
+    if (!showsVerticalScrollIndicator) {
+        return;
+    }
+    vc.contentScrollView.showsVerticalScrollIndicator = bShow;
+}
+
+- (NSMapTable *)showsVerticalScrollIndicatorMapTable {
+    if (!_showsVerticalScrollIndicatorMapTable) {
+        _showsVerticalScrollIndicatorMapTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    }
+    return _showsVerticalScrollIndicatorMapTable;
 }
 
 - (void)contentDidDisplayColumn:(NSInteger)columnIndex
@@ -241,10 +271,10 @@
 - (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex
 {
     if (_willAppearIndex >= 0 && _willAppearIndex != columnIndex) {
-        [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
+        [self nk_beginAppearanceTransition:self.viewControllers[self.willAppearIndex] isAppearing:NO animated:NO];
     }
     if (_willDisappearIndex >= 0 && _willDisappearIndex == columnIndex) {
-        [self.viewControllers[self.willDisappearIndex] beginAppearanceTransition:YES animated:NO];
+        [self nk_beginAppearanceTransition:self.viewControllers[self.willDisappearIndex] isAppearing:YES animated:NO];
     }
     
     if (_willAppearIndex >= 0) {
@@ -272,10 +302,10 @@
         // 滚动一下，然后松手回到原位置
         if ((isDragging || isDecelerating) && newCurrentIndex == self.currentIndex) {
             if (_willAppearIndex >= 0) {
-                [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
+                [self nk_beginAppearanceTransition:self.viewControllers[self.willAppearIndex] isAppearing:NO animated:NO];
             }
             if (_willDisappearIndex >= 0) {
-                [self.viewControllers[self.willDisappearIndex] beginAppearanceTransition:YES animated:NO];
+                [self nk_beginAppearanceTransition:self.viewControllers[self.willDisappearIndex] isAppearing:YES animated:NO];
             }
             
             if (_willAppearIndex >= 0) {
