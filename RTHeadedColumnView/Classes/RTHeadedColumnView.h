@@ -31,9 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 - (__kindof UIScrollView *)contentScrollView;
 
-@optional
-- (BOOL)contentScrollViewShowsVerticalScrollIndicator;
-
 @end
 
 @protocol RTHeadedColumnViewDelegate <NSObject>
