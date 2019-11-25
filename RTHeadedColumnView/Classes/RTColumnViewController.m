@@ -259,7 +259,12 @@
 
 - (void)contentDidDisplayColumn:(NSInteger)columnIndex
 {
-    
+    if (self.autoHideVerticalScrollIndicator) {
+        for (__kindof UIViewController<RTScrollableContent> * _Nonnull obj in self.showsVerticalScrollIndicatorMapTable.keyEnumerator) {
+            obj.contentScrollView.showsVerticalScrollIndicator = [[self.showsVerticalScrollIndicatorMapTable objectForKey:obj] boolValue];
+        }
+        [self.showsVerticalScrollIndicatorMapTable removeAllObjects];
+    }
 }
 
 - (void)contentDidScrollToOffset:(UIOffset)offset

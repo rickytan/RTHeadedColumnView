@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setCurrentIndex:(NSInteger)currentIndex animated:(BOOL)animated;
 
 - (void)contentDidScrollToOffset:(UIOffset)offset;
-- (void)contentDidDisplayColumn:(NSInteger)columnIndex;
+- (void)contentDidDisplayColumn:(NSInteger)columnIndex NS_REQUIRES_SUPER;
 
 @end
 
