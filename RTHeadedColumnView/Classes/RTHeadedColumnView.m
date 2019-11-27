@@ -92,7 +92,8 @@
 
 @end
 
-@interface RTHeadedColumnView () <UIScrollViewDelegate>
+@interface RTHeadedColumnView () <UIScrollViewDelegate, UIGestureRecognizerDelegate>
+@property (nonatomic, strong) UIPanGestureRecognizer * panGestureToFailScrollViewPanGesture;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat currentOffset;
 @end
@@ -211,6 +212,16 @@ static void *observerContext = &observerContext;
     }
 }
 
+- (UIPanGestureRecognizer *)panGestureToFailScrollViewPanGesture
+{
+    if (!_panGestureToFailScrollViewPanGesture) {
+        _panGestureToFailScrollViewPanGesture = [[UIPanGestureRecognizer alloc] init];
+        _panGestureToFailScrollViewPanGesture.delegate = self;
+        [self.scrollView.panGestureRecognizer requireGestureRecognizerToFail:_panGestureToFailScrollViewPanGesture];
+    }
+    return _panGestureToFailScrollViewPanGesture;
+}
+
 - (UIScrollView *)scrollView
 {
     if (!_scrollView) {
@@ -237,8 +248,10 @@ static void *observerContext = &observerContext;
 - (void)setHeaderView:(UIView *)headerView
 {
     if (headerView) {
+        [_headerView removeGestureRecognizer:_panGestureToFailScrollViewPanGesture];
         [_headerView removeFromSuperview];
         _headerView = headerView;
+        [_headerView addGestureRecognizer:self.panGestureToFailScrollViewPanGesture];
         _headerViewHeight = headerView.bounds.size.height;
         
         if (self.headerViewEmbeded) {
@@ -250,6 +263,7 @@ static void *observerContext = &observerContext;
         self.headerPinHeight = _headerPinHeight;
     }
     else {
+        [_headerView removeGestureRecognizer:_panGestureToFailScrollViewPanGesture];
         [_headerView removeFromSuperview];
         _headerView = nil;
         self.headerViewHeight = 0;
@@ -305,6 +319,12 @@ static void *observerContext = &observerContext;
             self.headerPinHeight = _headerPinHeight;
         }
     }
+}
+
+- (void)setAllowsScrollHorizontallyOnHeaderViewWhenEmbeded:(BOOL)allowsScrollHorizontallyOnHeaderViewWhenEmbeded
+{
+    _allowsScrollHorizontallyOnHeaderViewWhenEmbeded = allowsScrollHorizontallyOnHeaderViewWhenEmbeded;
+    self.panGestureToFailScrollViewPanGesture.enabled = !allowsScrollHorizontallyOnHeaderViewWhenEmbeded;
 }
 
 - (void)setHeaderViewHeight:(CGFloat)headerViewHeight
@@ -751,6 +771,17 @@ static void *observerContext = &observerContext;
         [self.delegate columnView:self
                 didScrollToOffset:UIOffsetMake(self.scrollView.contentOffset.x, _currentOffset)];
     }
+}
+
+#pragma mark - UIGestureRecognizer Delegate
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+    if (self.panGestureToFailScrollViewPanGesture == gestureRecognizer) {
+        CGPoint velocity = [self.panGestureToFailScrollViewPanGesture velocityInView:self.headerView];
+        return fabs(velocity.x) > fabs(velocity.y);
+    }
+    return YES;
 }
 
 @end
