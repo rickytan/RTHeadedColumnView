@@ -730,6 +730,7 @@ static void *observerContext = &observerContext;
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    self->_flags.ignoreLayoutSetContentOffset = YES;
     [self _detachHeaderView];
     
     [self _syncContentOffset];
