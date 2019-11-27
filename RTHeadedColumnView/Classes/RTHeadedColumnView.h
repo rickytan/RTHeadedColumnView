@@ -61,6 +61,8 @@ IB_DESIGNABLE
  */
 @property (nonatomic) IBInspectable BOOL headerViewEmbeded;
 
+@property (nonatomic) BOOL allowsScrollHorizontallyOnHeaderViewWhenEmbeded;
+
 /*!
  @brief      A boolean value tells if the content view's @c scrollIndicatorInsets should be adjusted.
              When set to @b NO, it does nothing, and if set to @b YES, the behavior is according to
