@@ -45,6 +45,7 @@
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.columnView.delegate = self;
     self.columnView.headerViewEmbeded = YES;
+    self.columnView.ignoreSafeAreaTopInset = self.edgesForExtendedLayout & UIRectEdgeTop;
     [self.view addSubview:self.columnView];
 }
 
@@ -104,6 +105,14 @@
 - (BOOL)shouldAutomaticallyForwardAppearanceMethods
 {
     return NO;
+}
+
+- (void)setEdgesForExtendedLayout:(UIRectEdge)edgesForExtendedLayout
+{
+    [super setEdgesForExtendedLayout:edgesForExtendedLayout];
+    if (self.isViewLoaded) {
+        self.columnView.ignoreSafeAreaTopInset = edgesForExtendedLayout & UIRectEdgeTop;
+    }
 }
 
 - (void)setViewControllers:(NSArray<__kindof UIViewController<RTScrollableContent> *> *)viewControllers

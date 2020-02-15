@@ -63,6 +63,8 @@ IB_DESIGNABLE
 
 @property (nonatomic) BOOL allowsScrollHorizontallyOnHeaderViewWhenEmbeded;
 
+@property (nonatomic) BOOL ignoreSafeAreaTopInset NS_AVAILABLE_IOS(11.0);
+
 /*!
  @brief      A boolean value tells if the content view's @c scrollIndicatorInsets should be adjusted.
              When set to @b NO, it does nothing, and if set to @b YES, the behavior is according to
