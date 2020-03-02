@@ -24,7 +24,7 @@
 
 #import "RTHeadedColumnView.h"
 
-
+#define SELSTR(sel)     ((NO && NSStringFromSelector(@selector(sel))), @#sel)
 #define RT_CONTENT_INSET(view)      ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset; } else { } insets; })
 
 
@@ -117,7 +117,8 @@ static void *observerContext = &observerContext;
 {
     _scrollView.delegate = nil;
     [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj.contentScrollView removeObserver:self forKeyPath:NSStringFromSelector(@selector(contentOffset)) context:observerContext];
+        [obj.contentScrollView removeObserver:self forKeyPath:SELSTR(contentOffset) context:observerContext];
+        [obj.contentScrollView removeObserver:self forKeyPath:SELSTR(safeAreaInsets) context:observerContext];
     }];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
@@ -164,17 +165,23 @@ static void *observerContext = &observerContext;
                 return;
             }
         }
-        if ([keyPath isEqualToString:NSStringFromSelector(@selector(safeAreaInsets))]) {
+        if ([keyPath isEqualToString:SELSTR(safeAreaInsets)]) {
+            const UIEdgeInsets newInsets = [change[NSKeyValueChangeNewKey] UIEdgeInsetsValue];
+            const UIEdgeInsets oldInsets = [change[NSKeyValueChangeOldKey] UIEdgeInsetsValue];
+            if (newInsets.top == oldInsets.top) {
+                return;
+            }
+            
             if (self.ignoreSafeAreaTopInset) {
                 self.headerPinHeight = _headerPinHeight;
             }
             return;
         }
         const CGPoint newOffset = [change[NSKeyValueChangeNewKey] CGPointValue];
-        const CGPoint oldOffset = [change[NSKeyValueChangeOldKey] CGPointValue];
-        if (CGPointEqualToPoint(newOffset, oldOffset)) {
-            return;
-        }
+//        const CGPoint oldOffset = [change[NSKeyValueChangeOldKey] CGPointValue];
+//        if (CGPointEqualToPoint(newOffset, oldOffset)) {
+//            return;
+//        }
         
         const CGFloat top = RT_CONTENT_INSET((UIScrollView *)object).top;
         const CGFloat offset = newOffset.y;
@@ -536,7 +543,10 @@ static void *observerContext = &observerContext;
         [_contentColumns enumerateObjectsUsingBlock:^(__kindof UIView<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [obj removeFromSuperview];
             [obj.contentScrollView removeObserver:self
-                                       forKeyPath:NSStringFromSelector(@selector(contentOffset))
+                                       forKeyPath:SELSTR(contentOffset)
+                                          context:observerContext];
+            [obj.contentScrollView removeObserver:self
+                                       forKeyPath:SELSTR(safeAreaInsets)
                                           context:observerContext];
             obj.contentScrollView.contentInset = obj.contentScrollView.rt_originalContentInset;
         }];
@@ -618,12 +628,12 @@ static void *observerContext = &observerContext;
             
             
             [obj.contentScrollView addObserver:self
-                                    forKeyPath:NSStringFromSelector(@selector(contentOffset))
+                                    forKeyPath:SELSTR(contentOffset)
                                        options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
                                        context:observerContext];
             [obj.contentScrollView addObserver:self
-                                    forKeyPath:NSStringFromSelector(@selector(safeAreaInsets))
-                                       options:NSKeyValueObservingOptionNew
+                                    forKeyPath:SELSTR(safeAreaInsets)
+                                       options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
                                        context:observerContext];
         }];
         
