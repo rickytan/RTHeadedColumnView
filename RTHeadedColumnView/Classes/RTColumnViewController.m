@@ -45,7 +45,10 @@
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.columnView.delegate = self;
     self.columnView.headerViewEmbeded = YES;
-    self.columnView.ignoreSafeAreaTopInset = self.edgesForExtendedLayout & UIRectEdgeTop;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+    self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+#pragma clang diagnostic pop
     [self.view addSubview:self.columnView];
 }
 
@@ -111,7 +114,21 @@
 {
     [super setEdgesForExtendedLayout:edgesForExtendedLayout];
     if (self.isViewLoaded) {
-        self.columnView.ignoreSafeAreaTopInset = edgesForExtendedLayout & UIRectEdgeTop;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+        self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (edgesForExtendedLayout & UIRectEdgeTop);
+#pragma clang diagnostic pop
+    }
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+- (void)setAutomaticallyAdjustsScrollViewInsets:(BOOL)automaticallyAdjustsScrollViewInsets
+#pragma clang diagnostic pop
+{
+    [super setAutomaticallyAdjustsScrollViewInsets:automaticallyAdjustsScrollViewInsets];
+    if (self.isViewLoaded) {
+        self.columnView.ignoreSafeAreaTopInset = automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
     }
 }
 
