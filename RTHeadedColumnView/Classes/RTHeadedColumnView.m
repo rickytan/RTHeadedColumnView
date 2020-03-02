@@ -25,8 +25,8 @@
 #import "RTHeadedColumnView.h"
 
 
-#define RT_CONTENT_INSET(view)      ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset; insets.top -= (view).safeAreaInsets.top; } else { } insets; })
-#define RT_IGNORED_TOP_INSET(view)  ({ CGFloat topInset = 0; if (@available(iOS 11.0, *)) { topInset = (view).safeAreaInsets.top; } (view).ignoreSafeAreaTopInset ? topInset : 0; })
+#define RT_CONTENT_INSET(view)      ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset; } else { } insets; })
+
 
 @interface UIScrollView (MultiColumnView)
 @property (nonatomic, assign) UIEdgeInsets rt_originalContentInset;
@@ -96,6 +96,7 @@
 @property (nonatomic, strong) UIPanGestureRecognizer * panGestureToFailScrollViewPanGesture;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, assign) CGFloat currentOffset;
+@property (nonatomic, readonly) CGFloat _innerHeaderViewHeight;
 @end
 
 static void *observerContext = &observerContext;
@@ -163,17 +164,28 @@ static void *observerContext = &observerContext;
                 return;
             }
         }
-        CGFloat top = RT_CONTENT_INSET((UIScrollView *)object).top;
-        CGFloat offset = [change[NSKeyValueChangeNewKey] CGPointValue].y;
+        if ([keyPath isEqualToString:NSStringFromSelector(@selector(safeAreaInsets))]) {
+            if (self.ignoreSafeAreaTopInset) {
+                self.headerPinHeight = _headerPinHeight;
+            }
+            return;
+        }
+        const CGPoint newOffset = [change[NSKeyValueChangeNewKey] CGPointValue];
+        const CGPoint oldOffset = [change[NSKeyValueChangeOldKey] CGPointValue];
+        if (CGPointEqualToPoint(newOffset, oldOffset)) {
+            return;
+        }
+        
+        const CGFloat top = RT_CONTENT_INSET((UIScrollView *)object).top;
+        const CGFloat offset = newOffset.y;
         self.currentOffset = offset + top;
         
-        const CGFloat offsetThreshold = self.headerViewHeight - self.headerPinHeight;
-        if (self.currentOffset > offsetThreshold - (self.headerViewEmbeded ? RT_IGNORED_TOP_INSET(self) : 0)) {
+        if (self.currentOffset > self.headerViewHeight - self.headerPinHeight) {
             if (self.headerView.superview != self) {
-                self.headerView.frame = CGRectMake(0, offset - offsetThreshold, self.bounds.size.width, self.headerViewHeight);
+                self.headerView.frame = CGRectMake(0, offset - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
             else {
-                self.headerView.frame = CGRectMake(0, - offsetThreshold, self.bounds.size.width, self.headerViewHeight);
+                self.headerView.frame = CGRectMake(0, - (self.headerViewHeight - self.headerPinHeight), self.bounds.size.width, self.headerViewHeight);
             }
         }
         else {
@@ -345,6 +357,21 @@ static void *observerContext = &observerContext;
     return 0.f;
 }
 
+- (CGFloat)_innerHeaderViewHeight
+{
+    if (self.headerView) {
+        if (self.ignoreSafeAreaTopInset) {
+            UIEdgeInsets inset = {0};
+            if (@available(iOS 11, *)) {
+                inset = self.safeAreaInsets;
+            }
+            return _headerViewHeight - inset.top;
+        }
+        return _headerViewHeight;
+    }
+    return 0.f;
+}
+
 - (void)setHeaderViewHeight:(CGFloat)headerViewHeight animated:(BOOL)animated
 {
     [UIView animateWithDuration:animated ? 0.25 : 0
@@ -386,7 +413,7 @@ static void *observerContext = &observerContext;
                 
                 UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
                 CGFloat delta = inset.top - self.headerPinHeight;
-                inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
+                inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
                 
                 CGPoint offset = obj.contentScrollView.contentOffset;
                 offset.y = MAX(offset.y + delta, - self.headerPinHeight) - obj.contentScrollView.rt_originalContentInset.top;
@@ -399,11 +426,18 @@ static void *observerContext = &observerContext;
             }
             else {
                 UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                CGFloat delta = inset.top - self.headerViewHeight;
-                inset.top = self.headerViewHeight + obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
-                
                 CGPoint offset = obj.contentScrollView.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerViewHeight) - obj.contentScrollView.rt_originalContentInset.top;
+                const UIEdgeInsets originalInset = obj.contentScrollView.rt_originalContentInset;
+                BOOL isAtTop = offset.y + inset.top <= 0;
+                
+                const CGFloat delta = inset.top - self.headerViewHeight;
+                inset.top = self._innerHeaderViewHeight + originalInset.top;
+                
+                if (isAtTop) {
+                    offset.y = -(self.headerViewHeight + originalInset.top);
+                } else {
+                    offset.y = MAX(offset.y + delta, - self.headerViewHeight) - originalInset.top;
+                }
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
@@ -541,13 +575,13 @@ static void *observerContext = &observerContext;
                 
                 if (self.headerViewEmbeded) {
                     UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                    inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
+                    inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
                     obj.contentScrollView.contentInset = inset;
                     obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                    inset.top = obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
+                    inset.top = obj.contentScrollView.rt_originalContentInset.top;
                     obj.contentScrollView.contentInset = inset;
                     obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
@@ -555,13 +589,13 @@ static void *observerContext = &observerContext;
             else {
                 if (self.headerViewEmbeded) {
                     UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                    inset.top = self.headerViewHeight + obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
+                    inset.top = self._innerHeaderViewHeight + obj.contentScrollView.rt_originalContentInset.top;
                     obj.contentScrollView.contentInset = inset;
                     obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
                 else {
                     UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                    inset.top = self.headerViewHeight - self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top - RT_IGNORED_TOP_INSET(self);
+                    inset.top = self._innerHeaderViewHeight - self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
                     obj.contentScrollView.contentInset = inset;
                     obj.contentScrollView.contentOffset = CGPointMake(0, self.currentOffset - inset.top);
                 }
@@ -573,7 +607,7 @@ static void *observerContext = &observerContext;
                 }
                 else {
                     UIEdgeInsets inset = obj.contentScrollView.scrollIndicatorInsets;
-                    inset.top = self.headerViewHeight - self.headerPinHeight - RT_IGNORED_TOP_INSET(self);
+                    inset.top = self._innerHeaderViewHeight - self.headerPinHeight;
                     obj.contentScrollView.scrollIndicatorInsets = inset;
                 }
             }
@@ -585,7 +619,11 @@ static void *observerContext = &observerContext;
             
             [obj.contentScrollView addObserver:self
                                     forKeyPath:NSStringFromSelector(@selector(contentOffset))
-                                       options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                       options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                                       context:observerContext];
+            [obj.contentScrollView addObserver:self
+                                    forKeyPath:NSStringFromSelector(@selector(safeAreaInsets))
+                                       options:NSKeyValueObservingOptionNew
                                        context:observerContext];
         }];
         
@@ -635,6 +673,13 @@ static void *observerContext = &observerContext;
     
     if (_headerView)
         [_headerView.superview bringSubviewToFront:_headerView];
+}
+
+- (void)didMoveToSuperview
+{
+    if (self.superview && self.ignoreSafeAreaTopInset) {
+        self.headerPinHeight = _headerPinHeight;
+    }
 }
 
 - (void)safeAreaInsetsDidChange
