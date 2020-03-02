@@ -372,7 +372,7 @@ static void *observerContext = &observerContext;
             if (@available(iOS 11, *)) {
                 inset = self.safeAreaInsets;
             }
-            return _headerViewHeight - inset.top;
+            return MAX(_headerViewHeight - inset.top, 0);
         }
         return _headerViewHeight;
     }
@@ -419,11 +419,13 @@ static void *observerContext = &observerContext;
                 }
                 
                 UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                CGFloat delta = inset.top - self.headerPinHeight;
-                inset.top = self.headerPinHeight + obj.contentScrollView.rt_originalContentInset.top;
+                const UIEdgeInsets originalInset = obj.contentScrollView.rt_originalContentInset;
+                
+                const CGFloat delta = inset.top - self.headerPinHeight;
+                inset.top = self.headerPinHeight + originalInset.top;
                 
                 CGPoint offset = obj.contentScrollView.contentOffset;
-                offset.y = MAX(offset.y + delta, - self.headerPinHeight) - obj.contentScrollView.rt_originalContentInset.top;
+                offset.y = MAX(offset.y + delta, - self.headerPinHeight) - originalInset.top;
                 
                 // Must change offset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
@@ -433,24 +435,19 @@ static void *observerContext = &observerContext;
             }
             else {
                 UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
-                CGPoint offset = obj.contentScrollView.contentOffset;
                 const UIEdgeInsets originalInset = obj.contentScrollView.rt_originalContentInset;
-                BOOL isAtTop = offset.y + inset.top <= 0;
                 
                 const CGFloat delta = inset.top - self.headerViewHeight;
                 inset.top = self._innerHeaderViewHeight + originalInset.top;
                 
-                if (isAtTop) {
-                    offset.y = -(self.headerViewHeight + originalInset.top);
-                } else {
-                    offset.y = MAX(offset.y + delta, - self.headerViewHeight) - originalInset.top;
-                }
+                CGPoint offset = obj.contentScrollView.contentOffset;
+                offset.y = MAX(offset.y + delta, - self.headerViewHeight) - originalInset.top;
                 
-                // Must change offset first!
+                // Must change inset first!
+                obj.contentScrollView.contentInset = inset;
                 self->_flags.ignoreOffsetChangeNotify = YES;
                 obj.contentScrollView.contentOffset = offset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
-                obj.contentScrollView.contentInset = inset;
             }
             
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
