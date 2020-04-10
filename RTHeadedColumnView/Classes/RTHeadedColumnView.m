@@ -25,8 +25,7 @@
 #import "RTHeadedColumnView.h"
 
 #define SELSTR(sel)     ((NO && NSStringFromSelector(@selector(sel))), @#sel)
-#define RT_CONTENT_INSET(view)      ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset; } else { } insets; })
-
+#define RT_CONTENT_INSET(view) ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).rt_originalContentInset;insets.top += (view).safeAreaInsets.top;insets.bottom += (view).safeAreaInsets.bottom;insets.left += (view).safeAreaInsets.left;insets.right += (view).safeAreaInsets.right;} else { } insets; })
 
 @interface UIScrollView (MultiColumnView)
 @property (nonatomic, assign) UIEdgeInsets rt_originalContentInset;
@@ -492,7 +491,6 @@ static void *observerContext = &observerContext;
                     tableView.tableHeaderView = [self _createPlaceholderHeaderViewWithHeight:self.headerViewHeight - self.headerPinHeight
                                                                      originalTableHeaderView:tableView.rt_originalTableHeaderView];
                 }
-                
                 UIEdgeInsets inset = RT_CONTENT_INSET(obj.contentScrollView);
                 CGFloat delta = inset.top;
                 inset.top = obj.contentScrollView.rt_originalContentInset.top;
