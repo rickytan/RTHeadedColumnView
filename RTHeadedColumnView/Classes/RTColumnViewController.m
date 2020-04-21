@@ -47,7 +47,11 @@
     self.columnView.headerViewEmbeded = YES;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
-    self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+    if (@available(iOS 11.0, *)) {
+        self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+    } else {
+        // Fallback on earlier versions
+    }
 #pragma clang diagnostic pop
     [self.view addSubview:self.columnView];
 }
@@ -116,7 +120,11 @@
     if (self.isViewLoaded) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
-        self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (edgesForExtendedLayout & UIRectEdgeTop);
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
 #pragma clang diagnostic pop
     }
 }
@@ -128,7 +136,11 @@
 {
     [super setAutomaticallyAdjustsScrollViewInsets:automaticallyAdjustsScrollViewInsets];
     if (self.isViewLoaded) {
-        self.columnView.ignoreSafeAreaTopInset = automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
     }
 }
 
