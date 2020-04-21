@@ -25,7 +25,7 @@
 #import "RTHeadedColumnView.h"
 
 #define SELSTR(sel)     ((NO && NSStringFromSelector(@selector(sel))), @#sel)
-#define RT_CONTENT_INSET(view) ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset;insets.bottom = (view).contentInset.bottom;} else { } insets; })
+#define RT_CONTENT_INSET(view) ({ UIEdgeInsets insets = (view).contentInset; if (@available(iOS 11.0, *)) { insets = (view).adjustedContentInset;if (self.ignoreSafeAreaTopInset) {insets.bottom = (view).contentInset.bottom;}} else { } insets; })
 
 @interface UIScrollView (MultiColumnView)
 @property (nonatomic, assign) UIEdgeInsets rt_originalContentInset;
