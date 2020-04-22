@@ -103,6 +103,7 @@ static void *observerContext = &observerContext;
 @implementation RTHeadedColumnView
 {
     struct {
+        BOOL overideIgnoreOffsetChangeNotify:1;
         BOOL ignoreOffsetChangeNotify:1;
         BOOL ignoreOffsetChangeObserve:1;
         BOOL ignoreLayoutSetContentOffset:1;
@@ -181,7 +182,9 @@ static void *observerContext = &observerContext;
 //        }
         
         if (self.ignoreSafeAreaTopInset) {
+            self->_flags.overideIgnoreOffsetChangeNotify = YES;
             self.headerPinHeight = _headerPinHeight;
+            self->_flags.overideIgnoreOffsetChangeNotify = NO;
         }
         return;
     }
@@ -541,7 +544,7 @@ static void *observerContext = &observerContext;
 {
     if (_currentOffset != currentOffset) {
         _currentOffset = currentOffset;
-        if (!self->_flags.ignoreOffsetChangeNotify && [self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
+        if ((!self->_flags.ignoreOffsetChangeNotify || self->_flags.overideIgnoreOffsetChangeNotify) && [self.delegate respondsToSelector:@selector(columnView:didScrollToOffset:)]) {
             [self.delegate columnView:self
                     didScrollToOffset:UIOffsetMake(self.scrollView.contentOffset.x, self.currentOffset)];
         }
