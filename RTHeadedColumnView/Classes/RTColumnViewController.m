@@ -109,6 +109,15 @@
     }];
 }
 
+- (void)willMoveToParentViewController:(UIViewController *)parent
+{
+    [super willMoveToParentViewController:parent];
+    if (parent) {
+        self.automaticallyAdjustsScrollViewInsets = parent.automaticallyAdjustsScrollViewInsets;
+        self.edgesForExtendedLayout = parent.edgesForExtendedLayout;
+    }
+}
+
 - (BOOL)shouldAutomaticallyForwardAppearanceMethods
 {
     return NO;
