@@ -45,6 +45,14 @@
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.columnView.delegate = self;
     self.columnView.headerViewEmbeded = YES;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+    if (@available(iOS 11.0, *)) {
+        self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+    } else {
+        // Fallback on earlier versions
+    }
+#pragma clang diagnostic pop
     [self.view addSubview:self.columnView];
 }
 
@@ -101,9 +109,48 @@
     }];
 }
 
+- (void)willMoveToParentViewController:(UIViewController *)parent
+{
+    [super willMoveToParentViewController:parent];
+    if (parent) {
+        self.automaticallyAdjustsScrollViewInsets = parent.automaticallyAdjustsScrollViewInsets;
+        self.edgesForExtendedLayout = parent.edgesForExtendedLayout;
+    }
+}
+
 - (BOOL)shouldAutomaticallyForwardAppearanceMethods
 {
     return NO;
+}
+
+- (void)setEdgesForExtendedLayout:(UIRectEdge)edgesForExtendedLayout
+{
+    [super setEdgesForExtendedLayout:edgesForExtendedLayout];
+    if (self.isViewLoaded) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
+#pragma clang diagnostic pop
+    }
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+- (void)setAutomaticallyAdjustsScrollViewInsets:(BOOL)automaticallyAdjustsScrollViewInsets
+#pragma clang diagnostic pop
+{
+    [super setAutomaticallyAdjustsScrollViewInsets:automaticallyAdjustsScrollViewInsets];
+    if (self.isViewLoaded) {
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
+    }
 }
 
 - (void)setViewControllers:(NSArray<__kindof UIViewController<RTScrollableContent> *> *)viewControllers
