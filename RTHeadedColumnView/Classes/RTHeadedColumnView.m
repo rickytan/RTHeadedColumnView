@@ -464,10 +464,10 @@ static void *observerContext = &observerContext;
                 
                 
                 // Must change inset first!
-                obj.contentScrollView.contentInset = inset;
                 self->_flags.ignoreOffsetChangeNotify = YES;
-                obj.contentScrollView.contentOffset = offset;
+                obj.contentScrollView.contentInset = inset;
                 self->_flags.ignoreOffsetChangeNotify = NO;
+                obj.contentScrollView.contentOffset = offset;
             }
             
             if (self.automaticallyAdjustsScrollIndicatorInsets) {
