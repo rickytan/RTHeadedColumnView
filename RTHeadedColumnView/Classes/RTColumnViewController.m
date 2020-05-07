@@ -215,6 +215,10 @@
     if (self.currentIndex == currentIndex) {
         return;
     }
+    if (!_flags._isAppeared) {
+        [self.columnView setSelectedColumn:currentIndex animated:animated];
+        return;
+    }
     
     NSInteger oldIndex = self.currentIndex;
     NSInteger newIndex = currentIndex;
