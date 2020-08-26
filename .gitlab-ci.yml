@@ -15,7 +15,8 @@ lint:
   only:
     # 基础库使用 master
     - master
-    - develop
+    # - develop
+    - merge_requests
     # 业务库使用 dev
     # - /^dev.*$/
   script:
