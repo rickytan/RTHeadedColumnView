@@ -459,9 +459,12 @@ static void *observerContext = &observerContext;
                 if (isAtTop) {
                     offset.y = -(self.headerViewHeight + originalInset.top);
                 } else {
-                    offset.y = MAX(offset.y + delta, - self.headerViewHeight) - originalInset.top;
+                    CGFloat bottom = scrollView.contentInset.bottom;
+                    if (@available(iOS 11, *)) {
+                        bottom = scrollView.adjustedContentInset.bottom;
+                    }
+                    offset.y = MIN(MAX(offset.y + delta, - self.headerViewHeight) - originalInset.top, scrollView.contentSize.height + bottom - scrollView.bounds.size.height);
                 }
-                
                 
                 // Must change inset first!
                 self->_flags.ignoreOffsetChangeNotify = YES;
