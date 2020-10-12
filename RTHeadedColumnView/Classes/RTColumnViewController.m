@@ -9,12 +9,19 @@
 
 @interface RTColumnViewController () <RTHeadedColumnViewDelegate>
 @property (nonatomic, strong) RTHeadedColumnView *columnView;
-
 @property (nonatomic) NSInteger willAppearIndex;
 @property (nonatomic) NSInteger willDisappearIndex;
+
+@property (nonatomic) NSMapTable<__kindof UIViewController<RTScrollableContent> *, NSNumber *> *showsVerticalScrollIndicatorMapTable;
 @end
 
 @implementation RTColumnViewController
+{
+    struct {
+        BOOL    _currentVCNeedsAppear:1;
+        BOOL    _isAppeared:1;
+    } _flags;
+}
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -38,6 +45,14 @@
     self.columnView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.columnView.delegate = self;
     self.columnView.headerViewEmbeded = YES;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+    if (@available(iOS 11.0, *)) {
+        self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+    } else {
+        // Fallback on earlier versions
+    }
+#pragma clang diagnostic pop
     [self.view addSubview:self.columnView];
 }
 
@@ -56,13 +71,17 @@
 {
     [super viewWillAppear:animated];
     
-    [self.currentViewController beginAppearanceTransition:YES animated:animated];
+    if (self.currentViewController) {
+        [self rt_beginAppearanceTransition:self.currentViewController isAppearing:YES animated:animated];
+    } else {
+        _flags._currentVCNeedsAppear = YES;
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
+    _flags._isAppeared = YES;
     [self.currentViewController endAppearanceTransition];
 }
 
@@ -70,13 +89,13 @@
 {
     [super viewWillDisappear:animated];
     
-    [self.currentViewController beginAppearanceTransition:NO animated:animated];
+    [self rt_beginAppearanceTransition:self.currentViewController isAppearing:NO animated:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
-    
+    _flags._isAppeared = NO;
     [self.currentViewController endAppearanceTransition];
 }
 
@@ -90,9 +109,48 @@
     }];
 }
 
+- (void)willMoveToParentViewController:(UIViewController *)parent
+{
+    [super willMoveToParentViewController:parent];
+    if (parent) {
+        self.automaticallyAdjustsScrollViewInsets = parent.automaticallyAdjustsScrollViewInsets;
+        self.edgesForExtendedLayout = parent.edgesForExtendedLayout;
+    }
+}
+
 - (BOOL)shouldAutomaticallyForwardAppearanceMethods
 {
     return NO;
+}
+
+- (void)setEdgesForExtendedLayout:(UIRectEdge)edgesForExtendedLayout
+{
+    [super setEdgesForExtendedLayout:edgesForExtendedLayout];
+    if (self.isViewLoaded) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = self.automaticallyAdjustsScrollViewInsets && (edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
+#pragma clang diagnostic pop
+    }
+}
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+- (void)setAutomaticallyAdjustsScrollViewInsets:(BOOL)automaticallyAdjustsScrollViewInsets
+#pragma clang diagnostic pop
+{
+    [super setAutomaticallyAdjustsScrollViewInsets:automaticallyAdjustsScrollViewInsets];
+    if (self.isViewLoaded) {
+        if (@available(iOS 11.0, *)) {
+            self.columnView.ignoreSafeAreaTopInset = automaticallyAdjustsScrollViewInsets && (self.edgesForExtendedLayout & UIRectEdgeTop);
+        } else {
+            // Fallback on earlier versions
+        }
+    }
 }
 
 - (void)setViewControllers:(NSArray<__kindof UIViewController<RTScrollableContent> *> *)viewControllers
@@ -120,12 +178,26 @@
             [arr addObject:obj.view];
         }];
         self.columnView.contentColumns = [arr copy];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self->_flags._currentVCNeedsAppear) {
+                self->_flags._currentVCNeedsAppear = NO;
+                [self rt_beginAppearanceTransition:self.currentViewController isAppearing:YES animated:NO];
+                
+                if (self->_flags._isAppeared) {
+                    [self.currentViewController endAppearanceTransition];
+                }
+            }
+        });
     }
 }
 
 - (UIViewController<RTScrollableContent> *)currentViewController
 {
-    return self.viewControllers[self.currentIndex];
+    if (0 <= self.currentIndex && self.currentIndex < self.viewControllers.count) {
+        return self.viewControllers[self.currentIndex];
+    }
+    return nil;
 }
 
 - (void)setCurrentIndex:(NSInteger)currentIndex
@@ -143,6 +215,10 @@
     if (self.currentIndex == currentIndex) {
         return;
     }
+    if (!_flags._isAppeared) {
+        [self.columnView setSelectedColumn:currentIndex animated:animated];
+        return;
+    }
     
     NSInteger oldIndex = self.currentIndex;
     NSInteger newIndex = currentIndex;
@@ -154,8 +230,8 @@
         [self.viewControllers[self.willDisappearIndex] endAppearanceTransition];
     }
     
-    [self.viewControllers[oldIndex] beginAppearanceTransition:NO animated:animated];
-    [self.viewControllers[newIndex] beginAppearanceTransition:YES animated:animated];
+    [self rt_beginAppearanceTransition:self.viewControllers[oldIndex] isAppearing:NO animated:animated];
+    [self rt_beginAppearanceTransition:self.viewControllers[newIndex] isAppearing:YES animated:animated];
     
     [self.columnView setSelectedColumn:currentIndex animated:animated];
     
@@ -175,7 +251,7 @@
         if (_willAppearIndex >= 0) {
             if ((willAppearIndex < _willDisappearIndex && _willAppearIndex > _willDisappearIndex) ||
                 (willAppearIndex > _willDisappearIndex && _willAppearIndex < _willDisappearIndex)) {
-                [self.viewControllers[_willAppearIndex] beginAppearanceTransition:NO animated:NO];
+                [self rt_beginAppearanceTransition:self.viewControllers[_willAppearIndex] isAppearing:NO animated:NO];
             }
             [self.viewControllers[_willAppearIndex] endAppearanceTransition];
         }
@@ -183,7 +259,7 @@
         _willAppearIndex = willAppearIndex;
         
         if (willAppearIndex >= 0) {
-            [self.viewControllers[willAppearIndex] beginAppearanceTransition:YES animated:YES];
+            [self rt_beginAppearanceTransition:self.viewControllers[willAppearIndex] isAppearing:YES animated:YES];
         }
     }
 }
@@ -198,14 +274,48 @@
         _willDisappearIndex = willDisappearIndex;
         
         if (willDisappearIndex >= 0) {
-            [self.viewControllers[willDisappearIndex] beginAppearanceTransition:NO animated:YES];
+            [self rt_beginAppearanceTransition:self.viewControllers[willDisappearIndex] isAppearing:NO animated:YES];
         }
     }
 }
 
+- (void)rt_beginAppearanceTransition:(UIViewController <RTScrollableContent> *)vc isAppearing:(BOOL)isAppearing animated:(BOOL)animated {
+    [vc beginAppearanceTransition:isAppearing animated:animated];
+    [self autoShowHideVerticalScrollIndicatorIfNeeded:vc bShow:isAppearing];
+}
+
+- (void)autoShowHideVerticalScrollIndicatorIfNeeded:(UIViewController <RTScrollableContent> *)vc bShow:(BOOL)bShow {
+    if (!self.autoHideVerticalScrollIndicator) {
+        return;
+    }
+    if (self.showsVerticalScrollIndicatorMapTable.count == 0) {
+        [self.viewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController<RTScrollableContent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSNumber *value = @(obj.contentScrollView.showsVerticalScrollIndicator);
+            [self.showsVerticalScrollIndicatorMapTable setObject:value forKey:obj];
+        }];
+    }
+    BOOL showsVerticalScrollIndicator = [[self.showsVerticalScrollIndicatorMapTable objectForKey:vc] boolValue];
+    if (!showsVerticalScrollIndicator) {
+        return;
+    }
+    vc.contentScrollView.showsVerticalScrollIndicator = bShow;
+}
+
+- (NSMapTable *)showsVerticalScrollIndicatorMapTable {
+    if (!_showsVerticalScrollIndicatorMapTable) {
+        _showsVerticalScrollIndicatorMapTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    }
+    return _showsVerticalScrollIndicatorMapTable;
+}
+
 - (void)contentDidDisplayColumn:(NSInteger)columnIndex
 {
-    
+    if (self.autoHideVerticalScrollIndicator) {
+        for (__kindof UIViewController<RTScrollableContent> * _Nonnull obj in self.showsVerticalScrollIndicatorMapTable.keyEnumerator) {
+            obj.contentScrollView.showsVerticalScrollIndicator = [[self.showsVerticalScrollIndicatorMapTable objectForKey:obj] boolValue];
+        }
+        [self.showsVerticalScrollIndicatorMapTable removeAllObjects];
+    }
 }
 
 - (void)contentDidScrollToOffset:(UIOffset)offset
@@ -218,10 +328,10 @@
 - (void)columnView:(RTHeadedColumnView *)columnView didDisplayColumn:(NSInteger)columnIndex
 {
     if (_willAppearIndex >= 0 && _willAppearIndex != columnIndex) {
-        [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
+        [self rt_beginAppearanceTransition:self.viewControllers[self.willAppearIndex] isAppearing:NO animated:NO];
     }
     if (_willDisappearIndex >= 0 && _willDisappearIndex == columnIndex) {
-        [self.viewControllers[self.willDisappearIndex] beginAppearanceTransition:YES animated:NO];
+        [self rt_beginAppearanceTransition:self.viewControllers[self.willDisappearIndex] isAppearing:YES animated:NO];
     }
     
     if (_willAppearIndex >= 0) {
@@ -249,10 +359,10 @@
         // 滚动一下，然后松手回到原位置
         if ((isDragging || isDecelerating) && newCurrentIndex == self.currentIndex) {
             if (_willAppearIndex >= 0) {
-                [self.viewControllers[self.willAppearIndex] beginAppearanceTransition:NO animated:NO];
+                [self rt_beginAppearanceTransition:self.viewControllers[self.willAppearIndex] isAppearing:NO animated:NO];
             }
             if (_willDisappearIndex >= 0) {
-                [self.viewControllers[self.willDisappearIndex] beginAppearanceTransition:YES animated:NO];
+                [self rt_beginAppearanceTransition:self.viewControllers[self.willDisappearIndex] isAppearing:YES animated:NO];
             }
             
             if (_willAppearIndex >= 0) {
