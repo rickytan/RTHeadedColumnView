@@ -765,7 +765,7 @@ static void *observerContext = &observerContext;
 
 - (void)_detachHeaderView
 {
-    if (_headerViewEmbeded) {
+    if (_headerViewEmbeded && self.headerView.superview != self) {
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
                                             toView:self];
         self.headerView.frame = rect;
@@ -775,7 +775,7 @@ static void *observerContext = &observerContext;
 
 - (void)_attachHeaderView
 {
-    if (_headerViewEmbeded) {
+    if (_headerViewEmbeded && self.headerView.superview == self) {
         UIView <RTScrollableContent> *contentView = _contentColumns[self.selectedColumn];
         CGRect rect = [self.headerView convertRect:self.headerView.bounds
                                             toView:contentView.contentScrollView];
@@ -836,7 +836,10 @@ static void *observerContext = &observerContext;
 {
     self->_flags.ignoreLayoutSetContentOffset = NO;
     [self _notifySelectionChanged];
-    [self _attachHeaderView];
+    // 两层嵌套时，快速横向滚动这里可能在手拖拽时多进入一次，此时 @c isTracking 为 @c YES，过滤这种情况，等真正停止
+    if (!scrollView.isTracking) {
+        [self _attachHeaderView];
+    }
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
