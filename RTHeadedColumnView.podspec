@@ -30,6 +30,6 @@ Pod::Spec.new do |s|
   # }
 
   s.public_header_files = 'RTHeadedColumnView/Classes/**/*.h'
-  s.frameworks = 'UIKit'
+  s.frameworks = 'Foundation', 'UIKit', 'CoreGraphics'
   # s.dependency 'AFNetworking', '~> 2.3'
 end
