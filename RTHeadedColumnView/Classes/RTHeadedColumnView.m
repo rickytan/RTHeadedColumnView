@@ -181,10 +181,14 @@ static void *observerContext = &observerContext;
 //            self->_flags.ignoreOffsetChangeObserve = NO;
 //        }
         
-        if (self.ignoreSafeAreaTopInset) {
-            self->_flags.overrideIgnoreOffsetChangeNotify = YES;
-            self.headerPinHeight = _headerPinHeight;
-            self->_flags.overrideIgnoreOffsetChangeNotify = NO;
+        if (@available(iOS 11.0, *)) {
+            if (self.ignoreSafeAreaTopInset) {
+                self->_flags.overrideIgnoreOffsetChangeNotify = YES;
+                self.headerPinHeight = _headerPinHeight;
+                self->_flags.overrideIgnoreOffsetChangeNotify = NO;
+            }
+        } else {
+            // Fallback on earlier versions
         }
         return;
     }
@@ -380,12 +384,13 @@ static void *observerContext = &observerContext;
 - (CGFloat)_innerHeaderViewHeight
 {
     if (self.headerView) {
-        if (self.ignoreSafeAreaTopInset) {
-            UIEdgeInsets inset = {0};
-            if (@available(iOS 11, *)) {
-                inset = self.safeAreaInsets;
+        if (@available(iOS 11.0, *)) {
+            if (self.ignoreSafeAreaTopInset) {
+                UIEdgeInsets inset = self.safeAreaInsets;
+                return _headerViewHeight - inset.top;
             }
-            return _headerViewHeight - inset.top;
+        } else {
+            // Fallback on earlier versions
         }
         return _headerViewHeight;
     }
@@ -708,8 +713,12 @@ static void *observerContext = &observerContext;
 
 - (void)didMoveToSuperview
 {
-    if (self.superview && self.ignoreSafeAreaTopInset) {
-        self.headerPinHeight = _headerPinHeight;
+    if (@available(iOS 11.0, *)) {
+        if (self.superview && self.ignoreSafeAreaTopInset) {
+            self.headerPinHeight = _headerPinHeight;
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }
 
