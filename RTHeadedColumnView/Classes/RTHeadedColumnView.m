@@ -595,7 +595,7 @@ static void *observerContext = &observerContext;
             contentScrollView.rt_originalContentInset = RT_CONTENT_INSET(contentScrollView);
             
             if ([contentScrollView isKindOfClass:[UITableView class]]) {
-                UITableView *tableView = (UITableView *)contentColumns;
+                UITableView *tableView = (UITableView *)contentScrollView;
                 if (![tableView.tableHeaderView isKindOfClass:[__RTTableHeaderPlaceholderView class]]) {
                     UIView *tableHeader = tableView.tableHeaderView;
                     tableView.tableHeaderView = nil;    // !IMPORTANT, don't remove
